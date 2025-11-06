@@ -30,6 +30,11 @@ export interface PayingKitOptions {
    */
   timeoutMs?: number
   /**
+   * Initial delay in milliseconds before starting to poll for the transaction status.
+   * @default 5000 (5 seconds)
+   */
+  initialDelayMs?: number
+  /**
    * A callback function that is called with the transaction state during polling.
    * @param state The current state of the transaction, including the attempt number.
    */
@@ -95,9 +100,8 @@ export class PayingKit {
     const bytes = encode(message, rfc8949EncodeOptions)
     const signature = this.#sign(bytes)
     const txid = bytesToBase64Url(signature)
-    const msgc = toMessageCompact(message)
-    const compactBytes = encode(msgc, rfc8949EncodeOptions)
-    const compressed = gzipCompress(compactBytes)
+    const cborBytes = encode(toMessageCompact(message), rfc8949EncodeOptions)
+    const compressed = gzipCompress(cborBytes)
     const msg = bytesToBase64Url(compressed)
 
     return {
@@ -124,7 +128,9 @@ export class PayingKit {
     const url = `${TXS_ENDPOINT}/${txid}`
 
     // Initial delay to allow payment processing to start
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await new Promise((resolve) =>
+      setTimeout(resolve, options.initialDelayMs ?? 5000)
+    )
 
     while (true) {
       attempt += 1

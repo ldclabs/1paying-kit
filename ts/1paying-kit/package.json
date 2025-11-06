@@ -1,6 +1,6 @@
 {
   "name": "@ldclabs/1paying-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "The Typescript version of the client SDK for https://1Pay.ing.",
   "license": "MIT",
@@ -32,9 +32,9 @@
     "ncu": "npx npm-check-updates -u"
   },
   "dependencies": {
-    "@noble/curves": "^1.9.0",
-    "@noble/hashes": "^1.8.0",
-    "cborg": "^4.3.0"
+    "@noble/curves": ">=1.9.0",
+    "@noble/hashes": ">=1.8.0",
+    "cborg": ">=4.3.0"
   },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
