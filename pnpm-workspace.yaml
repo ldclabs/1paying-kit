@@ -1,0 +1,4 @@
+packages:
+  - 'ts/1paying-kit'
+onlyBuiltDependencies:
+  - esbuild

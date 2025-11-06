@@ -1,0 +1,132 @@
+# 1Paying Kit (TypeScript)
+
+This is the TypeScript version of the client SDK for [1Pay.ing](https://1pay.ing), a decentralized payment protocol. It provides a simple and efficient way to integrate 1Pay.ing into your web applications, enabling you to request and verify payments with ease.
+
+This library is designed to be lightweight and work in modern browser environments, using standard Web APIs like `fetch` and the Web Crypto API where possible.
+
+## Features
+
+- **Easy Integration**: A simple `PayingKit` class to handle payment flows.
+- **Automatic 402 Handling**: `tryGetPayUrl` method to automatically handle `402 Payment Required` responses.
+- **Payment URL Generation**: Create payment URLs from server-provided requirements.
+- **Payment Verification**: `waitForPaymentPayload` to poll for payment completion and retrieve the payload.
+- **Lightweight**: Minimal dependencies, relying on `@noble/` for cryptography and `cborg` for CBOR encoding.
+- **Built-in Gzip**: Includes a pure TypeScript Gzip implementation for compressing payment messages.
+
+## Installation
+
+You can install the package using npm or your favorite package manager:
+
+```bash
+npm install @ldclabs/1paying-kit
+```
+
+## Usage
+
+Here's a basic example of how to use the `PayingKit` to handle a payment-required API response.
+
+### 1. Initialize the Kit
+
+First, import and create an instance of the `PayingKit`. You can use the default exported `kit` instance or create your own.
+
+```typescript
+import { payingKit } from '@ldclabs/1paying-kit';
+```
+
+### 2. Make an API Request
+
+When you make a request to a resource that requires payment, the server will respond with a `402 Payment Required` status and an `X-PAYMENT-RESPONSE` header.
+
+```typescript
+async function fetchData() {
+  const response = await fetch('https://api.example.com/premium-data');
+  const {payUrl, txid} = payingKit.tryGetPayUrl(response);
+  if (payUrl) {
+    // Payment is required, handle it with the kit
+    handlePayment(payUrl, txid);
+  } else {
+    // Process the successful response
+    const data = await response.json();
+    console.log('Data received:', data);
+  }
+}
+```
+
+### 3. Generate Payment URL and Wait for Payment
+
+Use `tryGetPayUrl` to parse the response and generate a payment URL. Then, use `waitForPaymentPayload` to poll for the payment to be completed.
+
+```typescript
+async function handlePayment(payUrl: string, txid: string) {
+  console.log(`Please complete the payment at: ${payUrl}`);
+  window.open(payUrl, '1Pay.ing') // Redirect user to sign the payment
+
+  try {
+    const payload = await payingKit.waitForPaymentPayload(txid, {
+      onprogress: (state) => {
+        console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`);
+      },
+    });
+    console.log('Payment successful! Received x402 PaymentPayload:', payload);
+
+    // Now you can retry the original request with the payment payload
+    // typically in an 'Authorization' or 'X-Payment' header.
+    const retriedResponse = await fetch('https://api.example.com/premium-data', {
+      headers: {
+        'X-PAYMENT': payload,
+      },
+    });
+
+    const data = await retriedResponse.json();
+    console.log('Data received after payment:', data);
+
+  } catch (error) {
+    console.error('Payment failed or timed out:', error);
+  }
+}
+```
+
+## API Reference
+
+### `PayingKit`
+
+The main class for interacting with the 1Pay.ing service.
+
+#### `constructor()`
+
+Creates a new `PayingKit` instance with a new Ed25519 key pair.
+
+#### `tryGetPayUrl(res: Response): { payUrl: string; txid: string } | {}`
+
+Parses a `fetch` `Response`. If the status is `402` and the `X-PAYMENT-RESPONSE` header is present, it returns an object with the `payUrl` and `txid`. Otherwise, it returns an empty object.
+
+#### `getPayUrl(requirements: PaymentRequirementsResponse): { payUrl: string; txid: string }`
+
+Generates a payment URL and transaction ID from the payment requirements provided by the server.
+
+#### `waitForPaymentPayload(txid: string, options?: PayingKitOptions): Promise<string>`
+
+Polls the 1Pay.ing transaction service until the payment is completed.
+
+- `txid`: The transaction ID from `getPayUrl` or `tryGetPayUrl`.
+- `options`:
+  - `timeoutMs` (optional): Timeout in milliseconds. Defaults to 3 minutes.
+  - `onprogress` (optional): A callback function `(state: TransactionState & { attempt: number }) => void` that receives polling status updates.
+
+Returns a promise that resolves with the base64-encoded payment payload upon success or rejects on failure or timeout.
+
+### Gzip Utilities
+
+The library also exports the underlying Gzip compression and decompression functions.
+
+- `gzipCompress(data: Uint8Array): Uint8Array`
+- `gzipDecompress(data: Uint8Array): Uint8Array`
+- `gzipCompressString(text: string): Uint8Array`
+- `gzipDecompressToString(data: Uint8Array): string`
+- `isGzip(data: Uint8Array): boolean`
+
+## License
+
+Copyright © 2025 [LDC Labs](https://github.com/ldclabs).
+
+Licensed under the Apache License. See [LICENSE](LICENSE) for details.
