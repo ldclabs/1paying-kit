@@ -25,64 +25,43 @@ npm install @ldclabs/1paying-kit
 
 Here's a basic example of how to use the `PayingKit` to handle a payment-required API response.
 
-### 1. Initialize the Kit
-
-First, import and create an instance of the `PayingKit`. You can use the default exported `kit` instance or create your own.
-
 ```typescript
-import { payingKit } from '@ldclabs/1paying-kit';
-```
+import { payingKit } from '@ldclabs/1paying-kit'
 
-### 2. Make an API Request
-
-When you make a request to a resource that requires payment, the server will respond with a `402 Payment Required` status and an `X-PAYMENT-RESPONSE` header.
-
-```typescript
 async function fetchData() {
-  const response = await fetch('https://api.example.com/premium-data');
+  let response = await fetch('https://api.example.com/premium-data');
+
+  // Check if payment is required
   const {payUrl, txid} = payingKit.tryGetPayUrl(response);
   if (payUrl) {
     // Payment is required, handle it with the kit
-    handlePayment(payUrl, txid);
-  } else {
-    // Process the successful response
-    const data = await response.json();
-    console.log('Data received:', data);
+    console.log(`Please complete the payment at: ${payUrl}`);
+    window.open(payUrl, '1Pay.ing') // Redirect user to sign the payment
+
+    try {
+      const payload = await payingKit.waitForPaymentPayload(txid, {
+        onprogress: (state) => {
+          console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`);
+        },
+      });
+      console.log('Payment successful! Received x402 PaymentPayload:', payload);
+
+      // Now you can retry the original request with the payment payload
+      // typically in an 'Authorization' or 'X-Payment' header.
+      response = await fetch('https://api.example.com/premium-data', {
+        headers: {
+          'X-PAYMENT': payload,
+        },
+      });
+    } catch (error) {
+      console.error('Payment failed or timed out:', error);
+      throw error;
+    }
   }
-}
-```
 
-### 3. Generate Payment URL and Wait for Payment
-
-Use `tryGetPayUrl` to parse the response and generate a payment URL. Then, use `waitForPaymentPayload` to poll for the payment to be completed.
-
-```typescript
-async function handlePayment(payUrl: string, txid: string) {
-  console.log(`Please complete the payment at: ${payUrl}`);
-  window.open(payUrl, '1Pay.ing') // Redirect user to sign the payment
-
-  try {
-    const payload = await payingKit.waitForPaymentPayload(txid, {
-      onprogress: (state) => {
-        console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`);
-      },
-    });
-    console.log('Payment successful! Received x402 PaymentPayload:', payload);
-
-    // Now you can retry the original request with the payment payload
-    // typically in an 'Authorization' or 'X-Payment' header.
-    const retriedResponse = await fetch('https://api.example.com/premium-data', {
-      headers: {
-        'X-PAYMENT': payload,
-      },
-    });
-
-    const data = await retriedResponse.json();
-    console.log('Data received after payment:', data);
-
-  } catch (error) {
-    console.error('Payment failed or timed out:', error);
-  }
+  // Process the successful response
+  const data = await response.json();
+  console.log('Data received:', data);
 }
 ```
 
@@ -92,9 +71,9 @@ async function handlePayment(payUrl: string, txid: string) {
 
 The main class for interacting with the 1Pay.ing service.
 
-#### `constructor()`
+#### `payingKit`
 
-Creates a new `PayingKit` instance with a new Ed25519 key pair.
+An instance of the `PayingKit` class initialized with a new Ed25519 key pair.
 
 #### `tryGetPayUrl(res: Response): { payUrl: string; txid: string } | {}`
 
