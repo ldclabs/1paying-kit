@@ -14,7 +14,7 @@ const makeRepeatingData = (length: number): Uint8Array => {
   const data = new Uint8Array(length)
   const pattern = encoder.encode('ABCD')
   for (let i = 0; i < length; i += 1) {
-    data[i] = pattern[i % pattern.length]
+    data[i] = pattern[i % pattern.length] as number
   }
   return data
 }
@@ -77,11 +77,11 @@ describe('gzip compression utilities', () => {
     const compressed = gzipCompress(input)
 
     const crcCorrupted = compressed.slice()
-    crcCorrupted[crcCorrupted.length - 8] ^= 0xff
+    crcCorrupted[crcCorrupted.length - 8]! ^= 0xff
     expect(() => gzipDecompress(crcCorrupted)).toThrow('CRC32 mismatch')
 
     const sizeCorrupted = compressed.slice()
-    sizeCorrupted[sizeCorrupted.length - 4] ^= 0xff
+    sizeCorrupted[sizeCorrupted.length - 4]! ^= 0xff
     expect(() => gzipDecompress(sizeCorrupted)).toThrow('Size mismatch')
   })
 
@@ -89,7 +89,7 @@ describe('gzip compression utilities', () => {
     const input = encoder.encode('dynamic block test')
     const compressed = gzipCompress(input)
     const mutated = compressed.slice()
-    mutated[10] = (mutated[10] & ~0x06) | 0x04
+    mutated[10] = (mutated[10]! & ~0x06) | 0x04
     expect(() => gzipDecompress(mutated)).toThrow(
       'Unsupported DEFLATE block type'
     )

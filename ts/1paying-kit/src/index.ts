@@ -13,7 +13,8 @@ export {
   gzipCompress,
   gzipCompressString,
   gzipDecompress,
-  gzipDecompressToString
+  gzipDecompressToString,
+  isGzip
 } from './gzip.js'
 export * from './types.js'
 
@@ -97,12 +98,11 @@ export class PayingKit {
       nonce: this.#nextNonce(),
       payload: requirements
     }
-    const bytes = encode(message, rfc8949EncodeOptions)
-    const signature = this.#sign(bytes)
-    const txid = bytesToBase64Url(signature)
+
     const cborBytes = encode(toMessageCompact(message), rfc8949EncodeOptions)
-    const compressed = gzipCompress(cborBytes)
-    const msg = bytesToBase64Url(compressed)
+    const signature = this.#sign(cborBytes)
+    const txid = bytesToBase64Url(signature)
+    const msg = bytesToBase64Url(gzipCompress(cborBytes))
 
     return {
       payUrl: `${PAYING_ENDPOINT}?action=pay#msg=${msg}&txid=${txid}`,
@@ -178,8 +178,8 @@ export class PayingKit {
     return ed25519.sign(message, this.#sk)
   }
 
-  #verify(message: Uint8Array, signature: Uint8Array): boolean {
-    return ed25519.verify(message, signature, this.#pk)
+  verify(message: Uint8Array, signature: Uint8Array): boolean {
+    return ed25519.verify(signature, message, this.#pk)
   }
 }
 
@@ -207,6 +207,11 @@ function bytesToBase64Url(bytes: Uint8Array): string {
 //   )
 // }
 
-function base64ToString(str: string): string {
+/**
+ * Decodes a base64 or base64url encoded string to a regular string.
+ * @param str The base64 or base64url encoded string.
+ * @returns The decoded string.
+ */
+export function base64ToString(str: string): string {
   return globalThis.atob(str.replaceAll('-', '+').replaceAll('_', '/'))
 }

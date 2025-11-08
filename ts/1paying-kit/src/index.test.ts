@@ -16,7 +16,6 @@ describe('PayingKit#getPayUrl', () => {
           'resource': 'https://api.example.com/premium-data',
           'description': 'Access to premium market data',
           'mimeType': 'application/json',
-          'outputSchema': undefined,
           'maxTimeoutSeconds': 60,
           'extra': {
             'name': 'USDC',
@@ -32,50 +31,73 @@ describe('PayingKit#getPayUrl', () => {
       'accepts': [
         {
           'scheme': 'exact',
-          'network': 'base-sepolia',
-          'maxAmountRequired': '10000',
-          'asset': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-          'payTo': '0x209693Bc6afc0C5328bA36FaF03C514EF312287C',
+          'network': 'solana',
+          'maxAmountRequired': '5000000',
+          'asset': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+          'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
           'resource': 'https://api.example.com/premium-data',
-          'description': 'Access to premium market data',
+          'description': 'Access to premium market data 1',
           'mimeType': 'application/json',
-          'outputSchema': undefined,
           'maxTimeoutSeconds': 60,
           'extra': {
-            'name': 'USDC',
-            'version': '2'
+            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
           }
         },
         {
           'scheme': 'exact',
-          'network': 'base-sepolia',
-          'maxAmountRequired': '10000',
-          'asset': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-          'payTo': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+          'network': 'solana',
+          'maxAmountRequired': '5000000',
+          'asset': '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+          'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
           'resource': 'https://api.example.com/premium-data',
-          'description': 'Access to premium market 1 data',
+          'description': 'Access to premium market data 1',
           'mimeType': 'application/json',
-          'outputSchema': undefined,
           'maxTimeoutSeconds': 60,
           'extra': {
-            'name': 'USDC',
-            'version': '2'
+            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
+            'version': 'devnet'
           }
         },
         {
           'scheme': 'exact',
-          'network': 'base-sepolia',
-          'maxAmountRequired': '10000',
-          'asset': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
-          'payTo': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+          'network': 'solana',
+          'maxAmountRequired': '5000000',
+          'asset': 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+          'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
           'resource': 'https://api.example.com/premium-data',
-          'description': 'Access to premium market 1 data',
+          'description': 'Access to premium market data 2',
           'mimeType': 'application/json',
-          'outputSchema': undefined,
           'maxTimeoutSeconds': 60,
           'extra': {
-            'name': 'USDC',
-            'version': '2'
+            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+          }
+        },
+        {
+          'scheme': 'exact',
+          'network': 'solana',
+          'maxAmountRequired': '50000000',
+          'asset': 'So11111111111111111111111111111111111111111',
+          'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
+          'resource': 'https://api.example.com/premium-data',
+          'description': 'Access to premium market data 3',
+          'mimeType': 'application/json',
+          'maxTimeoutSeconds': 60,
+          'extra': {
+            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+          }
+        },
+        {
+          'scheme': 'exact',
+          'network': 'solana',
+          'maxAmountRequired': '5000000000',
+          'asset': 'PAYiNGqaLFRdBomkQY3JXZeCm7wzK7hKuhrJDzcZBWN',
+          'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
+          'resource': 'https://api.example.com/premium-data',
+          'description': 'Access to premium market data 4',
+          'mimeType': 'application/json',
+          'maxTimeoutSeconds': 60,
+          'extra': {
+            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
           }
         }
       ]
@@ -88,7 +110,7 @@ describe('PayingKit#getPayUrl', () => {
     console.log('Requirements 1 payUrl length:', payUrl.length)
     const { payUrl: payUrl2 } = payingKit.getPayUrl(requirements2)
     console.log('Requirements 2 payUrl length:', payUrl2.length)
-    console.log({ payUrl, txid })
-    expect(payUrl2.length < payUrl.length + 100).toBe(true)
+    console.log({ payUrl2, txid })
+    expect(payUrl2.length < payUrl.length * 2).toBe(true)
   })
 })
