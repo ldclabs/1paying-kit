@@ -1,0 +1,32 @@
+{
+	"name": "1paying-coffee-worker",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"cf-typegen": "wrangler types",
+		"format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss,svelte}\"",
+		"ncu": "npx npm-check-updates -u"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.4.1",
+		"@eslint/js": "^9.39.1",
+		"@types/node": "^24",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.13.0",
+		"globals": "^16.5.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-svelte": "^3.4.0",
+		"prettier-plugin-tailwindcss": "^0.7.1",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.46.3",
+		"wrangler": "^4.46.0"
+	},
+	"dependencies": {
+		"@ldclabs/1paying-kit": "^0.2.0",
+		"hono": "^4.10.4"
+	}
+}

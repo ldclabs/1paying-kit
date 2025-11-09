@@ -1,4 +1,5 @@
 packages:
+  - 'examples/1paying-coffee'
   - 'ts/1paying-kit'
 onlyBuiltDependencies:
   - esbuild
