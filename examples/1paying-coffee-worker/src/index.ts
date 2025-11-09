@@ -1,6 +1,7 @@
 import { stringToBase64 } from '@ldclabs/1paying-kit/utils'
 import { DurableObject } from 'cloudflare:workers'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
 import { jsonResponse, X402PaymentResult } from './types'
 import { settlePayment } from './x402'
@@ -122,6 +123,8 @@ interface CoffeeOrderRecord extends CoffeeOrder {
 const app = new Hono<{
 	Bindings: Env
 }>()
+
+app.get('/api/my-coffee', cors())
 
 app.post('/api/make-coffee', async (ctx) => {
 	let result: X402PaymentResult<any>

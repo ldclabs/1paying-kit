@@ -33,12 +33,11 @@
   let successMessage = $state('')
   let merchant = $state('')
   let payer = $state('')
-  let orders: CoffeeOrderRecord[] = $state([])
   let ordersView: Array<
     CoffeeOrderRecord & {
       meta: { symbol: string; name: string; decimals: number }
     }
-  > = []
+  > = $state([])
   let payWindow = $state<Window | null>(null)
 
   function resetState() {
@@ -132,7 +131,7 @@
         throw new Error(await res.text())
       }
       const { result }: { result: CoffeeOrderRecord[] } = await res.json()
-      orders = result.map((order) => ({
+      ordersView = result.map((order) => ({
         ...order,
         meta: getAssetMeta(order.asset)
       }))

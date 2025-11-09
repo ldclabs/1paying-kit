@@ -2,6 +2,10 @@
 
 This is the backend for the "Buy Me a Coffee" demo application, built with Cloudflare Workers. It demonstrates how to protect an API endpoint with x402 payments by integrating with an x402 facilitator.
 
+## Online Demo
+
+[https://1paying-coffee.zensh.workers.dev/](https://1paying-coffee.zensh.workers.dev/)
+
 ## Features
 
 -   **HTTP 402 Enforcement**: Interacts with an x402 facilitator to generate `402 Payment Required` responses and verify incoming payments from the `X-PAYMENT` header.

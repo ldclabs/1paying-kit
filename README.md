@@ -38,6 +38,10 @@ This is a monorepo containing the following main parts:
 
 The fastest way to understand `1paying-kit` is to run the "Buy Me a Coffee" demo project.
 
+### Online Demo
+
+[https://1paying-coffee.zensh.workers.dev/](https://1paying-coffee.zensh.workers.dev/)
+
 ### Prerequisites
 
 -   [Node.js](https://nodejs.org/) (v20 or later)

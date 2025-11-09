@@ -8,6 +8,10 @@ The application consists of two main parts within the monorepo:
 - `1paying-coffee-app`: A SvelteKit frontend that handles the user interface and payment flow.
 - `1paying-coffee-worker`: A Cloudflare Worker backend that requires x402 payments for a protected resource and records successful "purchases" in a Durable Object.
 
+## Online Demo
+
+[https://1paying-coffee.zensh.workers.dev/](https://1paying-coffee.zensh.workers.dev/)
+
 ## How It Works
 
 1. The user clicks the "Pay with 1Pay.ing" button.
@@ -60,6 +64,6 @@ To create a production version of the app and deploy it with the worker:
 
 2.  **Deploy the worker:**
     ```sh
-    pnpm --filter 1paying-coffee-worker deploy
+    pnpm --filter 1paying-coffee-worker run deploy
     ```
     This will publish the worker along with the frontend assets to your Cloudflare account.
