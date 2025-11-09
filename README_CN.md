@@ -1,5 +1,7 @@
 # 1Pay.ing Kit
 
+![1Pay.ing Logo](./1Pay.ing.webp)
+
 [![npm version](https://img.shields.io/npm/v/@ldclabs/1paying-kit.svg)](https://www.npmjs.com/package/@ldclabs/1paying-kit)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
