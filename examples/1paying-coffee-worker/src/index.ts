@@ -1,7 +1,8 @@
 import { stringToBase64 } from '@ldclabs/1paying-kit/utils'
 import { DurableObject } from 'cloudflare:workers'
 import { Hono } from 'hono'
-import { jsonResponse } from './types'
+import { HTTPException } from 'hono/http-exception'
+import { jsonResponse, X402PaymentResult } from './types'
 import { settlePayment } from './x402'
 
 /**
@@ -30,7 +31,7 @@ export class CoffeeStore extends DurableObject {
 				payer TEXT NOT NULL,
 				asset TEXT NOT NULL,
 				amount_required TEXT NOT NULL,
-				transaction TEXT NOT NULL UNIQUE,
+				tx TEXT NOT NULL UNIQUE,
 				network TEXT NOT NULL,
 				created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 				updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -46,14 +47,13 @@ export class CoffeeStore extends DurableObject {
 				payer,
 				asset,
 				amount_required,
-				transaction,
+				tx,
 				network
 			) VALUES (?1, ?2, ?3, ?4, ?5)
-			ON CONFLICT(transaction) DO UPDATE SET
+			ON CONFLICT(tx) DO UPDATE SET
 				payer = excluded.payer,
 				asset = excluded.asset,
 				amount_required = excluded.amount_required,
-				transaction = excluded.transaction,
 				network = excluded.network,
 				updated_at = unixepoch()
 			`,
@@ -78,7 +78,7 @@ export class CoffeeStore extends DurableObject {
 				payer,
 				asset,
 				amount_required AS amountRequired,
-				transaction,
+				tx,
 				network,
 				created_at AS createdAt,
 				updated_at AS updatedAt
@@ -98,7 +98,7 @@ export class CoffeeStore extends DurableObject {
 			payer: String(row.payer),
 			asset: String(row.asset),
 			amountRequired: String(row.amountRequired),
-			transaction: String(row.transaction),
+			transaction: String(row.tx),
 			network: String(row.network),
 			createdAt: Number(row.createdAt),
 			updatedAt: Number(row.updatedAt)
@@ -124,7 +124,19 @@ const app = new Hono<{
 }>()
 
 app.post('/api/make-coffee', async (ctx) => {
-	const result = await settlePayment(ctx)
+	let result: X402PaymentResult<any>
+	try {
+		result = await settlePayment(ctx)
+	} catch (err) {
+		if (err instanceof Response) {
+			return err
+		} else if (err instanceof HTTPException) {
+			return err.getResponse()
+		} else {
+			return jsonResponse({ error: String(err) }, 500)
+		}
+	}
+
 	const stub = ctx.env.COFFEE_STORE.getByName(result.paymentRequirements.payTo)
 	const order: CoffeeOrder = {
 		payer: result.settleResponse.payer,
@@ -135,9 +147,20 @@ app.post('/api/make-coffee', async (ctx) => {
 	}
 	const coffeeMessage = await stub.makeCoffee(order)
 
-	return jsonResponse({ result: coffeeMessage }, 200, {
-		'X-PAYMENT-RESPONSE': stringToBase64(JSON.stringify(result.settleResponse))
-	})
+	return jsonResponse(
+		{
+			result: {
+				message: coffeeMessage,
+				merchant: result.paymentRequirements.payTo
+			}
+		},
+		200,
+		{
+			'X-PAYMENT-RESPONSE': stringToBase64(
+				JSON.stringify(result.settleResponse)
+			)
+		}
+	)
 })
 
 app.get('/api/my-coffee', async (ctx) => {
@@ -153,6 +176,7 @@ app.get('/api/my-coffee', async (ctx) => {
 		)
 	}
 
+	// TODO: authentication to prevent data leak
 	const limit = limitParam ? Number.parseInt(limitParam, 10) : 20
 	const stub = ctx.env.COFFEE_STORE.getByName(payTo)
 	const orders = await stub.getOrders(
@@ -161,7 +185,7 @@ app.get('/api/my-coffee', async (ctx) => {
 		network
 	)
 
-	return jsonResponse({ data: orders })
+	return jsonResponse({ result: orders })
 })
 
 export default app satisfies ExportedHandler<Env>

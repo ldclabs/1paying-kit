@@ -1,5 +1,7 @@
 packages:
-  - 'examples/1paying-coffee'
+  - 'examples/1paying-coffee-app'
+  - 'examples/1paying-coffee-worker'
   - 'ts/1paying-kit'
 onlyBuiltDependencies:
   - esbuild
+  - '@tailwindcss/oxide'

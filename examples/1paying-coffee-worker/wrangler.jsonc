@@ -46,7 +46,7 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": {
-		"X402_FACILITATOR": "https://facilitator.payai.network",
+		"X402_FACILITATOR": "https://www.x402.org/facilitator",
 		"X402_PAYMENT_REQUIREMENTS": {
 			"x402Version": 1,
 			"error": "Payment required",
@@ -56,12 +56,13 @@
 					"network": "solana-devnet",
 					"maxAmountRequired": "1000000",
 					"asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-					"payTo": "45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX",
+					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
 					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
 					"description": "Grande Cappuccino with oat milk",
+					"mimeType": "image/png",
 					"maxTimeoutSeconds": 120,
 					"extra": {
-						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
+						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
 					}
 				},
 				{
@@ -69,12 +70,13 @@
 					"network": "solana",
 					"maxAmountRequired": "1000000",
 					"asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-					"payTo": "45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX",
+					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
 					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
 					"description": "Grande Cappuccino with oat milk",
+					"mimeType": "image/png",
 					"maxTimeoutSeconds": 120,
 					"extra": {
-						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
+						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
 					}
 				}
 			]

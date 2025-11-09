@@ -55,6 +55,8 @@ export async function settlePayment(
 			'content-type': 'application/json'
 		},
 		body: JSON.stringify({
+			x402Version: paymentRequirementsResponse.x402Version, // old facilitator requires this
+			paymentHeader: payment, // old facilitator requires this
 			paymentPayload,
 			paymentRequirements
 		})

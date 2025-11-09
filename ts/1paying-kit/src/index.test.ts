@@ -40,12 +40,12 @@ describe('PayingKit#getPayUrl', () => {
           'mimeType': 'application/json',
           'maxTimeoutSeconds': 60,
           'extra': {
-            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+            'feePayer': 'CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5'
           }
         },
         {
           'scheme': 'exact',
-          'network': 'solana',
+          'network': 'solana-devnet',
           'maxAmountRequired': '5000000',
           'asset': '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
           'payTo': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
@@ -54,8 +54,7 @@ describe('PayingKit#getPayUrl', () => {
           'mimeType': 'application/json',
           'maxTimeoutSeconds': 60,
           'extra': {
-            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX',
-            'version': 'devnet'
+            'feePayer': 'CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5'
           }
         },
         {
@@ -69,7 +68,7 @@ describe('PayingKit#getPayUrl', () => {
           'mimeType': 'application/json',
           'maxTimeoutSeconds': 60,
           'extra': {
-            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+            'feePayer': 'CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5'
           }
         },
         {
@@ -83,7 +82,7 @@ describe('PayingKit#getPayUrl', () => {
           'mimeType': 'application/json',
           'maxTimeoutSeconds': 60,
           'extra': {
-            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+            'feePayer': 'CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5'
           }
         },
         {
@@ -97,7 +96,7 @@ describe('PayingKit#getPayUrl', () => {
           'mimeType': 'application/json',
           'maxTimeoutSeconds': 60,
           'extra': {
-            'feePayer': '45FWyVsWLVUKyAdGwFaeDvxwYnQGoBshfoJAm6fhoECX'
+            'feePayer': 'CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5'
           }
         }
       ]
