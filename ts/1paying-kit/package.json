@@ -1,6 +1,6 @@
 {
   "name": "@ldclabs/1paying-kit",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "description": "The Typescript version of the client SDK for https://1Pay.ing.",
   "license": "MIT",
@@ -25,6 +25,28 @@
   ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./gzip": {
+      "types": "./dist/gzip.d.ts",
+      "browser": "./dist/gzip.js",
+      "default": "./dist/gzip.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "browser": "./dist/types.js",
+      "default": "./dist/types.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "browser": "./dist/utils.js",
+      "default": "./dist/utils.js"
+    }
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\"",

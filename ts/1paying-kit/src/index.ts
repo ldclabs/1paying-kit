@@ -8,15 +8,11 @@ import type {
   TransactionState
 } from './types.js'
 import { toMessageCompact } from './types.js'
+import { bytesToBase64Url, base64ToString } from './utils.js'
 
-export {
-  gzipCompress,
-  gzipCompressString,
-  gzipDecompress,
-  gzipDecompressToString,
-  isGzip
-} from './gzip.js'
+export * from './gzip.js'
 export * from './types.js'
+export * from './utils.js'
 
 const PAYING_ENDPOINT = 'https://1pay.ing/app'
 const TXS_ENDPOINT = 'https://txs.1pay.ing/tx'
@@ -188,30 +184,3 @@ export class PayingKit {
  */
 export const payingKit = new PayingKit()
 
-// function bytesToBase64(bytes: Uint8Array): string {
-//   return globalThis.btoa(String.fromCharCode(...bytes))
-// }
-
-function bytesToBase64Url(bytes: Uint8Array): string {
-  return globalThis
-    .btoa(String.fromCharCode(...bytes))
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-    .replaceAll('=', '')
-}
-
-// function base64ToBytes(str: string): Uint8Array {
-//   return Uint8Array.from(
-//     globalThis.atob(str.replaceAll('-', '+').replaceAll('_', '/')),
-//     (m) => m.charCodeAt(0)
-//   )
-// }
-
-/**
- * Decodes a base64 or base64url encoded string to a regular string.
- * @param str The base64 or base64url encoded string.
- * @returns The decoded string.
- */
-export function base64ToString(str: string): string {
-  return globalThis.atob(str.replaceAll('-', '+').replaceAll('_', '/'))
-}

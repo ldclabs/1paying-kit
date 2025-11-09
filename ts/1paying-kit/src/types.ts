@@ -248,3 +248,39 @@ export interface PaymentPayload<T> {
   /** The scheme-specific payload. */
   payload: T
 }
+
+/** Represents the verification and settlement request structure for X402 payments.
+ * @template T The type of the payment payload.
+ */
+export interface X402Request<T> {
+  paymentPayload: PaymentPayload<T>
+  paymentRequirements: PaymentRequirements
+}
+
+/**
+ * Represents the response for verifying a payment.
+ */
+export interface VerifyResponse {
+  /** Indicates whether the payment is valid. */
+  isValid: boolean
+  /** The address of the payer. */
+  payer: string
+  /** The reason why the payment is invalid, if applicable. */
+  invalidReason?: string
+}
+
+/**
+ * Represents the response for settling a payment.
+ */
+export interface SettleResponse {
+  /** Indicates whether the settlement was successful. */
+  success: boolean
+  /** The reason why the settlement failed, if applicable. */
+  errorReason?: string
+  /** The ID of the transaction being settled. */
+  transaction: string
+  /** The blockchain network where the transaction was processed. */
+  network: string
+  /** The address of the payer. */
+  payer: string
+}
