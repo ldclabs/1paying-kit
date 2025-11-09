@@ -30,9 +30,9 @@ x402 规范通过引入“支付服务商 (Facilitator)” 的角色，解耦了
 
 这是一个 monorepo 仓库，包含以下主要部分：
 
--   `ts/1paying-kit`: 核心的 TypeScript SDK (`@ldclabs/1paying-kit`)。它提供了在客户端处理 HTTP 402 支付流程所需的所有工具。
--   `examples/1paying-coffee-app`: 一个使用 SvelteKit 构建的前端示例应用。它完整地展示了如何使用 `1paying-kit` 与一个需要付费的后端进行交互。
--   `examples/1paying-coffee-worker`: 一个使用 Cloudflare Worker 构建的后端示例应用。它演示了如何保护一个 API 端点，并通过与 x402 Facilitator 的交互来要求和验证支付。
+-   [`ts/1paying-kit`](https://github.com/ldclabs/1paying-kit/tree/main/ts/1paying-kit): 核心的 TypeScript SDK (`@ldclabs/1paying-kit`)。它提供了在客户端处理 HTTP 402 支付流程所需的所有工具。
+-   [`examples/1paying-coffee-app`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-app): 一个使用 SvelteKit 构建的前端示例应用。它完整地展示了如何使用 `1paying-kit` 与一个需要付费的后端进行交互。
+-   [`examples/1paying-coffee-worker`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-worker): 一个使用 Cloudflare Worker 构建的后端示例应用。它演示了如何保护一个 API 端点，并通过与 x402 Facilitator 的交互来要求和验证支付。
 
 ## 快速开始 (运行示例项目)
 

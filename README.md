@@ -30,9 +30,9 @@ The x402 specification decouples backend applications from payment services by i
 
 This is a monorepo containing the following main parts:
 
--   `ts/1paying-kit`: The core TypeScript SDK (`@ldclabs/1paying-kit`). It provides all the tools needed to handle the HTTP 402 payment flow on the client side.
--   `examples/1paying-coffee-app`: A frontend demo application built with SvelteKit. It fully demonstrates how to use `1paying-kit` to interact with a payment-protected backend.
--   `examples/1paying-coffee-worker`: A backend demo application built with Cloudflare Workers. It shows how to protect an API endpoint and verify payments by integrating with an x402 facilitator.
+-   [`ts/1paying-kit`](https://github.com/ldclabs/1paying-kit/tree/main/ts/1paying-kit): The core TypeScript SDK (`@ldclabs/1paying-kit`). It provides all the tools needed to handle the HTTP 402 payment flow on the client side.
+-   [`examples/1paying-coffee-app`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-app): A frontend demo application built with SvelteKit. It fully demonstrates how to use `1paying-kit` to interact with a payment-protected backend.
+-   [`examples/1paying-coffee-worker`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-worker): A backend demo application built with Cloudflare Workers. It shows how to protect an API endpoint and verify payments by integrating with an x402 facilitator.
 
 ## Getting Started (Running the Demo)
 
