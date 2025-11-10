@@ -34,6 +34,7 @@ This is a monorepo containing the following main parts:
 
 -   [`ts/1paying-kit`](https://github.com/ldclabs/1paying-kit/tree/main/ts/1paying-kit): The core TypeScript SDK (`@ldclabs/1paying-kit`). It provides all the tools needed to handle the HTTP 402 payment flow on the client side.
 -   [`examples/1paying-coffee-app`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-app): A frontend demo application built with SvelteKit. It fully demonstrates how to use `1paying-kit` to interact with a payment-protected backend.
+-   [`examples/1paying-coffee-cli`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-cli): A command-line interface (CLI) demo application. It demonstrates how to use `1paying-kit` in a Node.js environment to handle the entire HTTP 402 payment flow from the terminal.
 -   [`examples/1paying-coffee-worker`](https://github.com/ldclabs/1paying-kit/tree/main/examples/1paying-coffee-worker): A backend demo application built with Cloudflare Workers. It shows how to protect an API endpoint and verify payments by integrating with an x402 facilitator.
 
 ## Getting Started (Running the Demo)
@@ -85,44 +86,72 @@ npm install @ldclabs/1paying-kit
 
 `1paying-kit` can automatically handle the 402 flow by intercepting `fetch`, or you can handle it manually.
 
+This example is designed to be the simplest possible demonstration of a complete `1paying-kit` integration.
 ```typescript
 import { payingKit } from '@ldclabs/1paying-kit'
+import { stdin as input, stdout as output } from 'node:process'
+import * as readline from 'node:readline/promises'
+import { exec } from 'node:child_process'
+import { ProxyAgent, setGlobalDispatcher } from 'undici'
 
-async function fetchData() {
-  let response = await fetch('https://api.example.com/premium-data');
+const proxy = process.env.http_proxy || process.env.https_proxy
+if (proxy) {
+  console.log(`Using proxy: ${proxy}`)
+  setGlobalDispatcher(new ProxyAgent(proxy))
+}
 
-  // Check if payment is required
-  const {payUrl, txid} = payingKit.tryGetPayUrl(response);
-  if (payUrl) {
+// Run with: npx tsx cli.ts
+async function main() {
+  const rl = readline.createInterface({ input, output })
+  const coffeeStore = 'https://1paying-coffee.zensh.workers.dev'
+
+  console.log('Welcome to the 1Paying Coffee CLI!')
+  let response = await fetch(`${coffeeStore}/api/make-coffee`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+
+  console.log(`Initial response status: ${response.status}`)
+  const { payUrl, txid } = await payingKit.tryGetPayUrl(response)
+  if (payUrl && txid) {
     // Payment is required, handle it with the kit
-    console.log(`Please complete the payment at: ${payUrl}`);
-    window.open(payUrl, '1Pay.ing') // Redirect user to sign the payment
+    const _answer = await rl.question(
+      `Press ENTER to open in the browser...\n${payUrl} (Enter)`
+    )
+
+    // Redirect user to sign the payment
+    exec(`open "${payUrl}"`)
 
     try {
-      const payload = await payingKit.waitForPaymentPayload(txid, {
+      const payloadHeader = await payingKit.waitForPaymentPayload(txid, {
         onprogress: (state) => {
-          console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`);
-        },
-      });
-      console.log('Payment successful! Received x402 PaymentPayload:', payload);
+          process.stdout.write(`\rPayment status: ${state.status}`)
+        }
+      })
 
       // Now you can retry the original request with the payment payload
       // typically in an 'Authorization' or 'X-Payment' header.
-      response = await fetch('https://api.example.com/premium-data', {
+      response = await fetch(`${coffeeStore}/api/make-coffee`, {
+        method: 'POST',
         headers: {
-          'X-PAYMENT': payload,
-        },
-      });
+          'X-PAYMENT': payloadHeader
+        }
+      })
     } catch (error) {
-      console.error('Payment failed or timed out:', error);
-      throw error;
+      console.error('Payment failed or timed out:', error)
+      throw error
     }
   }
 
+  rl.close()
   // Process the successful response
-  const data = await response.json();
-  console.log('Data received:', data);
+  const data = await response.json()
+  console.log('Your coffee:', data)
 }
+
+main().catch((error) => {
+  console.error('Error in main:', error)
+})
 ```
 
 ## License

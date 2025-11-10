@@ -1,5 +1,6 @@
 packages:
   - 'examples/1paying-coffee-app'
+  - 'examples/1paying-coffee-cli'
   - 'examples/1paying-coffee-worker'
   - 'ts/1paying-kit'
 onlyBuiltDependencies:
