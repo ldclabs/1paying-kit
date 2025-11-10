@@ -46,7 +46,7 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": {
-		"X402_FACILITATOR": "https://www.x402.org/facilitator",
+		"X402_FACILITATOR": "https://facilitator.payai.network",
 		"X402_PAYMENT_REQUIREMENTS": {
 			"x402Version": 1,
 			"error": "Payment required",
@@ -62,7 +62,7 @@
 					"mimeType": "image/png",
 					"maxTimeoutSeconds": 120,
 					"extra": {
-						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
 					}
 				},
 				{
@@ -76,7 +76,7 @@
 					"mimeType": "image/png",
 					"maxTimeoutSeconds": 120,
 					"extra": {
-						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
 					}
 				}
 			]

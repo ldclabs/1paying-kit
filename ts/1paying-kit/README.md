@@ -29,22 +29,22 @@ Here's a basic example of how to use the `PayingKit` to handle a payment-require
 import { payingKit } from '@ldclabs/1paying-kit'
 
 async function fetchData() {
-  let response = await fetch('https://api.example.com/premium-data');
+  let response = await fetch('https://api.example.com/premium-data')
 
   // Check if payment is required
-  const {payUrl, txid} = payingKit.tryGetPayUrl(response);
+  const {payUrl, txid} = await payingKit.tryGetPayUrl(response)
   if (payUrl) {
     // Payment is required, handle it with the kit
-    console.log(`Please complete the payment at: ${payUrl}`);
+    console.log(`Please complete the payment at: ${payUrl}`)
     window.open(payUrl, '1Pay.ing') // Redirect user to sign the payment
 
     try {
       const payload = await payingKit.waitForPaymentPayload(txid, {
         onprogress: (state) => {
-          console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`);
+          console.log(`Payment status: ${state.status}, attempt: ${state.attempt}`)
         },
-      });
-      console.log('Payment successful! Received x402 PaymentPayload:', payload);
+      })
+      console.log('Payment successful! Received x402 PaymentPayload:', payload)
 
       // Now you can retry the original request with the payment payload
       // typically in an 'Authorization' or 'X-Payment' header.
@@ -52,16 +52,16 @@ async function fetchData() {
         headers: {
           'X-PAYMENT': payload,
         },
-      });
+      })
     } catch (error) {
-      console.error('Payment failed or timed out:', error);
-      throw error;
+      console.error('Payment failed or timed out:', error)
+      throw error
     }
   }
 
   // Process the successful response
-  const data = await response.json();
-  console.log('Data received:', data);
+  const data = await response.json()
+  console.log('Data received:', data)
 }
 ```
 
@@ -75,7 +75,7 @@ The main class for interacting with the 1Pay.ing service.
 
 An instance of the `PayingKit` class initialized with a new Ed25519 key pair.
 
-#### `tryGetPayUrl(res: Response): { payUrl: string; txid: string } | {}`
+#### `async tryGetPayUrl(res: Response): Promise<{ payUrl: string | null; txid: string | null }>`
 
 Parses a `fetch` `Response`. If the status is `402` and the `X-PAYMENT-RESPONSE` header is present, it returns an object with the `payUrl` and `txid`. Otherwise, it returns an empty object.
 

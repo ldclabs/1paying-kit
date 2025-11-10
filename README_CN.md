@@ -40,6 +40,10 @@ x402 规范通过引入“支付服务商 (Facilitator)” 的角色，解耦了
 
 最快了解 `1paying-kit` 的方式就是运行 "Buy Me a Coffee" 示例项目。
 
+### 在线演示
+
+[https://1paying-coffee.zensh.workers.dev/](https://1paying-coffee.zensh.workers.dev/)
+
 ### 环境要求
 
 -   [Node.js](https://nodejs.org/) (v20 或更高版本)

@@ -8,7 +8,7 @@ import type {
   TransactionState
 } from './types.js'
 import { toMessageCompact } from './types.js'
-import { bytesToBase64Url, base64ToString } from './utils.js'
+import { bytesToBase64Url } from './utils.js'
 
 export * from './gzip.js'
 export * from './types.js'
@@ -61,22 +61,14 @@ export class PayingKit {
    * @param res The fetch Response object.
    * @returns A object containing the payment URL and transaction ID, or an empty object if payment is not required.
    */
-  tryGetPayUrl(res: Response):
-    | {
-        payUrl: string
-        txid: string
-      }
-    | {} {
+  async tryGetPayUrl(res: Response): Promise<{
+    payUrl: string | null
+    txid: string | null
+  }> {
     if (res.status !== 402) {
-      return {}
+      return { payUrl: null, txid: null }
     }
-    let header = res.headers.get('X-PAYMENT-RESPONSE')
-    if (!header) {
-      return {}
-    }
-    const requirements: PaymentRequirementsResponse = JSON.parse(
-      base64ToString(header)
-    )
+    const requirements: PaymentRequirementsResponse = await res.json()
     return this.getPayUrl(requirements)
   }
 
@@ -183,4 +175,3 @@ export class PayingKit {
  * A default instance of the PayingKit.
  */
 export const payingKit = new PayingKit()
-
