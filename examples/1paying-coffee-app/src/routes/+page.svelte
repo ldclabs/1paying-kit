@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    PayingKit,
+    payingKit,
     base64ToString,
     type SettleResponse
   } from '@ldclabs/1paying-kit'
@@ -14,8 +14,6 @@
     createdAt: number
     updatedAt: number
   }
-
-  const kit = new PayingKit()
 
   const COFFEE_STORE_URL = 'https://1paying-coffee.zensh.workers.dev'
 
@@ -65,11 +63,11 @@
         )
       }
       const requirements = await res.json()
-      const { payUrl, txid } = kit.getPayUrl(requirements)
+      const { payUrl, txid } = payingKit.getPayUrl(requirements)
 
       payWindow = window.open(payUrl, '1paying-checkout')
 
-      const paymentPayload = await kit.waitForPaymentPayload(txid, {
+      const paymentPayload = await payingKit.waitForPaymentPayload(txid, {
         onprogress: (state) => {
           paymentStatus = state.status
         }
@@ -95,6 +93,10 @@
       if (header) {
         const settleInfo = JSON.parse(base64ToString(header)) as SettleResponse
         payer = settleInfo.payer
+        await payingKit.submitSettleResult(txid, settleInfo).catch((err) => {
+          // Ignore settle submission errors
+          console.error('Settle submission error:', err)
+        })
         await loadHistory()
       }
     } catch (error) {

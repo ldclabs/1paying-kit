@@ -1,4 +1,4 @@
-import { payingKit } from '@ldclabs/1paying-kit'
+import { payingKit, type SettleResponse } from '@ldclabs/1paying-kit'
 import { stdin as input, stdout as output } from 'node:process'
 import * as readline from 'node:readline/promises'
 import { exec } from 'node:child_process'
@@ -47,6 +47,18 @@ async function main() {
           'X-PAYMENT': payloadHeader
         }
       })
+      const header = response.headers.get('X-PAYMENT-RESPONSE')
+      if (header) {
+        const settleInfo: SettleResponse = JSON.parse(
+          Buffer.from(header, 'base64').toString()
+        )
+
+        // Optionally submit the settle result back to 1pay.ing for better analytics
+        await payingKit.submitSettleResult(txid, settleInfo).catch((err) => {
+          // Ignore settle submission errors
+          console.error('Settle submission error:', err)
+        })
+      }
     } catch (error) {
       console.error('Payment failed or timed out:', error)
       throw error

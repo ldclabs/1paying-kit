@@ -284,3 +284,11 @@ export interface SettleResponse {
   /** The address of the payer. */
   payer: string
 }
+
+/**
+ * Represents the result of updating a payment transaction status.
+ */
+export type UpdatePaymentTxStatus = {
+    tx: string;
+    status: "finalized" | "failed";
+}

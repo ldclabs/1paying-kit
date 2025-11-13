@@ -7,7 +7,7 @@ import type {
   PaymentRequirementsResponse,
   TransactionState
 } from './types.js'
-import { toMessageCompact } from './types.js'
+import { toMessageCompact, type SettleResponse } from './types.js'
 import { bytesToBase64Url } from './utils.js'
 
 export * from './gzip.js'
@@ -155,6 +155,24 @@ export class PayingKit {
 
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
+  }
+
+  /**
+   * (Optional) Submits a settle response to update the transaction status.
+   * @param txid The transaction ID to update.
+   * @param res The settle response containing the transaction and success status.
+   */
+  async submitSettleResult(txid: string, res: SettleResponse): Promise<void> {
+    await fetch(`${TXS_ENDPOINT}/${txid}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        tx: res.transaction,
+        status: res.success ? 'finalized' : 'failed'
+      })
+    })
   }
 
   #nextNonce(): number {
