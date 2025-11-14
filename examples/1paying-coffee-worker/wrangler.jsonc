@@ -46,25 +46,15 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": {
-		"X402_FACILITATOR": "https://facilitator.payai.network",
+		"X402_FACILITATORS": {
+			"solana": "https://facilitator.payai.network",
+			"solana-devnet": "https://www.x402.org/facilitator",
+			"base-sepolia": "https://www.x402.org/facilitator"
+		},
 		"X402_PAYMENT_REQUIREMENTS": {
 			"x402Version": 1,
 			"error": "Payment required",
 			"accepts": [
-				{
-					"scheme": "exact",
-					"network": "solana-devnet",
-					"maxAmountRequired": "1000000",
-					"asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
-					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
-					"description": "Grande Cappuccino with oat milk",
-					"mimeType": "image/png",
-					"maxTimeoutSeconds": 120,
-					"extra": {
-						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
-					}
-				},
 				{
 					"scheme": "exact",
 					"network": "solana",
@@ -78,6 +68,32 @@
 					"extra": {
 						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
 					}
+				},
+				{
+					"scheme": "exact",
+					"network": "solana-devnet",
+					"maxAmountRequired": "10000",
+					"asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
+					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
+					"description": "Grande Cappuccino with oat milk",
+					"mimeType": "image/png",
+					"maxTimeoutSeconds": 120,
+					"extra": {
+						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+					}
+				},
+				{
+					"scheme": "exact",
+					"network": "base-sepolia",
+					"maxAmountRequired": "10000",
+					"payTo": "0x185a1DEf920B8c8f936988D70aC93aE453acf42B",
+					"asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
+					"description": "Grande Cappuccino with oat milk",
+					"mimeType": "image/png",
+					"maxTimeoutSeconds": 300,
+					"extra": { "name": "USDC", "version": "2" }
 				}
 			]
 		}

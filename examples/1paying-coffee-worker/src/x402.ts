@@ -49,7 +49,17 @@ export async function settlePayment(
 		})
 	}
 
-	const res = await fetch(`${ctx.env.X402_FACILITATOR}/settle`, {
+	const facilitator = (ctx.env.X402_FACILITATORS as Record<string, string>)[
+		paymentPayload.network
+	]
+
+	if (!facilitator) {
+		throw new HTTPException(500, {
+			res: jsonResponse({ error: 'No Facilitator Configured for Network' })
+		})
+	}
+
+	const res = await fetch(`${facilitator}/settle`, {
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
