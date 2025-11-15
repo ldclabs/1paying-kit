@@ -26,7 +26,7 @@
 		"wrangler": "^4.48.0"
 	},
 	"dependencies": {
-		"@ldclabs/1paying-kit": "^0.2.2",
+		"@ldclabs/1paying-kit": "^0.2.3",
 		"hono": "^4.10.5"
 	}
 }

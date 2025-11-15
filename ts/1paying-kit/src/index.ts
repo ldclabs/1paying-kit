@@ -14,7 +14,7 @@ export * from './gzip.js'
 export * from './types.js'
 export * from './utils.js'
 
-const PAYING_ENDPOINT = 'https://1pay.ing/app'
+const PAYING_ENDPOINT = 'https://1pay.ing/sign'
 const TXS_ENDPOINT = 'https://txs.1pay.ing/tx'
 
 /**
