@@ -15,7 +15,7 @@ export * from './types.js'
 export * from './utils.js'
 
 const PAYING_ENDPOINT = 'https://1pay.ing/sign'
-const TXS_ENDPOINT = 'https://txs.1pay.ing/tx'
+const API_ENDPOINT = 'https://api.1pay.ing/tx'
 
 /**
  * Options for the PayingKit.
@@ -113,7 +113,7 @@ export class PayingKit {
     let requestFailed = 0
     const timeoutMs = options.timeoutMs ?? 1000 * 60 * 3 // default 3 minutes
     const startTime = Date.now()
-    const url = `${TXS_ENDPOINT}/${txid}`
+    const url = `${API_ENDPOINT}/${txid}`
 
     // Initial delay to allow payment processing to start
     await new Promise((resolve) =>
@@ -163,7 +163,7 @@ export class PayingKit {
    * @param res The settle response containing the transaction and success status.
    */
   async submitSettleResult(txid: string, res: SettleResponse): Promise<void> {
-    await fetch(`${TXS_ENDPOINT}/${txid}/status`, {
+    await fetch(`${API_ENDPOINT}/${txid}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
