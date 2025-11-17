@@ -32,6 +32,10 @@ export interface PayingKitOptions {
    */
   initialDelayMs?: number
   /**
+   * An AbortSignal to cancel the operation.
+   */
+  signal?: AbortSignal
+  /**
    * A callback function that is called with the transaction state during polling.
    * @param state The current state of the transaction, including the attempt number.
    */
@@ -112,6 +116,7 @@ export class PayingKit {
     let attempt = 0
     let requestFailed = 0
     const timeoutMs = options.timeoutMs ?? 1000 * 60 * 3 // default 3 minutes
+    const signal: AbortSignal | null | undefined = options.signal
     const startTime = Date.now()
     const url = `${API_ENDPOINT}/${txid}`
 
@@ -122,7 +127,7 @@ export class PayingKit {
 
     while (true) {
       attempt += 1
-      const response = await fetch(url)
+      const response = await fetch(url, { signal })
       if (response.status === 200) {
         requestFailed = 0
         const data: TransactionState = await response.json()

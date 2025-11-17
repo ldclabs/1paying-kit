@@ -11,8 +11,8 @@ importers:
   examples/1paying-coffee-app:
     dependencies:
       '@ldclabs/1paying-kit':
-        specifier: ^0.2.3
-        version: 0.2.3
+        specifier: ^0.2.4
+        version: 0.2.4
     devDependencies:
       '@eslint/compat':
         specifier: ^1.4.0
@@ -81,8 +81,8 @@ importers:
   examples/1paying-coffee-cli:
     dependencies:
       '@ldclabs/1paying-kit':
-        specifier: ^0.2.3
-        version: 0.2.3
+        specifier: ^0.2.4
+        version: 0.2.4
       undici:
         specifier: ^7.16.0
         version: 7.16.0
@@ -121,8 +121,8 @@ importers:
   examples/1paying-coffee-worker:
     dependencies:
       '@ldclabs/1paying-kit':
-        specifier: ^0.2.3
-        version: 0.2.3
+        specifier: ^0.2.4
+        version: 0.2.4
       hono:
         specifier: ^4.10.5
         version: 4.10.5
@@ -758,8 +758,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@ldclabs/1paying-kit@0.2.3':
-    resolution: {integrity: sha512-aFFeQ1iCcII0J5i/liOjfZTQ1/ojICLwb2Mi0Qa7sKntYd5vmmMeGYF9pxJF7zJah8n14+p6RHKZBiHd1sjhTA==}
+  '@ldclabs/1paying-kit@0.2.4':
+    resolution: {integrity: sha512-o6yfvqAtBo+yuX2npPIpSsKxN89SZE83Ue6OOtzgTotDaHdU0MPdXXJJt9CuhWlziCzI6VMHOp45iqxa25nH5w==}
     engines: {node: '>=20.0.0'}
 
   '@noble/curves@1.9.7':
@@ -3100,7 +3100,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@ldclabs/1paying-kit@0.2.3':
+  '@ldclabs/1paying-kit@0.2.4':
     dependencies:
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0

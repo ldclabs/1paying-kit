@@ -1,7 +1,8 @@
 <script lang="ts">
   import {
-    payingKit,
     base64ToString,
+    payingKit,
+    type PaymentRequirementsResponse,
     type SettleResponse
   } from '@ldclabs/1paying-kit'
 
@@ -36,6 +37,7 @@
       meta: { symbol: string; name: string; decimals: number }
     }
   > = $state([])
+  let requirements = $state<PaymentRequirementsResponse | null>(null)
   let payWindow = $state<Window | null>(null)
 
   function resetState() {
@@ -43,7 +45,7 @@
     successMessage = ''
   }
 
-  async function buyCoffee() {
+  function buyCoffee() {
     if (isProcessing) {
       return
     }
@@ -51,65 +53,80 @@
     resetState()
     isProcessing = true
 
-    try {
-      const res = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
+    if (!requirements) {
+      fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
         method: 'POST'
       })
-
-      if (res.status !== 402) {
-        const text = await res.text()
-        throw new Error(
-          `Expected an HTTP 402 response but received ${res.status}: ${text}`
-        )
-      }
-      const requirements = await res.json()
-      const { payUrl, txid } = payingKit.getPayUrl(requirements)
-
-      payWindow = window.open(payUrl, '1paying-checkout')
-
-      const paymentPayload = await payingKit.waitForPaymentPayload(txid, {
-        onprogress: (state) => {
-          paymentStatus = state.status
-        }
-      })
-
-      const coffeeRes = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
-        method: 'POST',
-        headers: {
-          'X-PAYMENT': paymentPayload
-        }
-      })
-
-      if (!coffeeRes.ok) {
-        throw new Error(await coffeeRes.text())
-      }
-
-      const { result }: { result: { message: string; merchant: string } } =
-        await coffeeRes.json()
-      successMessage = result.message || 'Enjoy your coffee!'
-      merchant = result.merchant
-
-      const header = coffeeRes.headers.get('X-PAYMENT-RESPONSE')
-      if (header) {
-        const settleInfo = JSON.parse(base64ToString(header)) as SettleResponse
-        payer = settleInfo.payer
-        await payingKit.submitSettleResult(txid, settleInfo).catch((err) => {
-          // Ignore settle submission errors
-          console.error('Settle submission error:', err)
+        .then(async (res) => {
+          if (res.status !== 402) {
+            const text = await res.text()
+            throw new Error(
+              `Expected an HTTP 402 response but received ${res.status}: ${text}`
+            )
+          }
+          requirements = await res.json()
         })
-        await loadHistory()
-      }
-    } catch (error) {
-      errorMessage = formatError(error)
-    } finally {
-      isProcessing = false
-      if (payWindow && !payWindow.closed) {
-        // Close the payment window if it's still open
-        // We can not reuse the window for another payment due to browser security policies
-        // Error: Blocked a frame with origin "https://1paying-coffee.zensh.workers.dev" from accessing a cross-origin frame.
-        payWindow.close()
-      }
-      payWindow = null
+        .catch((error) => {
+          errorMessage = formatError(error)
+        })
+        .finally(() => {
+          isProcessing = false
+        })
+    } else {
+      const { payUrl, txid } = payingKit.getPayUrl(requirements)
+      // Should open a new window in event handler context to avoid popup blockers in mobile browsers
+      payWindow = window.open(payUrl, '1paying-checkout')
+      payingKit
+        .waitForPaymentPayload(txid, {
+          onprogress: (state) => {
+            paymentStatus = state.status
+          }
+        })
+        .then(async (paymentPayload) => {
+          const coffeeRes = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
+            method: 'POST',
+            headers: {
+              'X-PAYMENT': paymentPayload
+            }
+          })
+
+          if (!coffeeRes.ok) {
+            throw new Error(await coffeeRes.text())
+          }
+
+          const { result }: { result: { message: string; merchant: string } } =
+            await coffeeRes.json()
+          successMessage = result.message || 'Enjoy your coffee!'
+          merchant = result.merchant
+
+          const header = coffeeRes.headers.get('X-PAYMENT-RESPONSE')
+          if (header) {
+            const settleInfo = JSON.parse(
+              base64ToString(header)
+            ) as SettleResponse
+            payer = settleInfo.payer
+            await payingKit
+              .submitSettleResult(txid, settleInfo)
+              .catch((err) => {
+                // Ignore settle submission errors
+                console.error('Settle submission error:', err)
+              })
+            await loadHistory()
+          }
+        })
+        .catch((error) => {
+          errorMessage = formatError(error)
+        })
+        .finally(() => {
+          isProcessing = false
+          if (payWindow && !payWindow.closed) {
+            // Close the payment window if it's still open
+            // We can not reuse the window for another payment due to browser security policies
+            // Error: Blocked a frame with origin "https://1paying-coffee.zensh.workers.dev" from accessing a cross-origin frame.
+            payWindow.close()
+          }
+          payWindow = null
+        })
     }
   }
 
@@ -313,13 +330,17 @@
           <div class="mt-6 flex flex-col gap-2">
             <button
               type="button"
-              class="m-auto inline-flex w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold text-stone-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="m-auto inline-flex w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold {requirements
+                ? 'text-green-500'
+                : 'text-stone-950'} shadow-lg shadow-amber-500/20 transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
               onclick={buyCoffee}
               disabled={isProcessing}
             >
-              {isProcessing
-                ? `Waiting for payment...${paymentStatus}`
-                : 'Pay with 1Pay.ing'}
+              {!requirements
+                ? 'Buy a Coffee'
+                : isProcessing
+                  ? `Waiting for payment...${paymentStatus}`
+                  : 'Pay with 1Pay.ing'}
             </button>
           </div>
         </div>
