@@ -65,6 +65,7 @@
             )
           }
           requirements = await res.json()
+          errorMessage = requirements?.error || ''
         })
         .catch((error) => {
           errorMessage = formatError(error)
@@ -245,7 +246,7 @@
   ></div>
 
   <div class="relative z-10 mx-auto max-w-6xl px-6 pt-20 pb-24">
-    <div class="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+    <div class="grid w-full grid-cols-1 gap-12 lg:grid-cols-[1.1fr_0.9fr]">
       <section class="space-y-10">
         <div class="space-y-6">
           <div class="flex items-center gap-4">
@@ -309,7 +310,6 @@
               alt="1Pay.ing Coffee Logo"
               class="m-auto my-4 w-xs rounded-lg"
             />
-
             {#if errorMessage}
               <p class="mt-2 text-sm text-red-500">
                 {errorMessage}
@@ -330,7 +330,7 @@
           <div class="mt-6 flex flex-col gap-2">
             <button
               type="button"
-              class="m-auto inline-flex w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold {requirements
+              class="m-auto inline-flex w-full max-w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold {requirements
                 ? 'text-green-500'
                 : 'text-stone-950'} shadow-lg shadow-amber-500/20 transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
               onclick={buyCoffee}
