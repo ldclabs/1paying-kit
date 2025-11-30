@@ -37,6 +37,6 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
-		"@ldclabs/1paying-kit": "^0.3.1"
+		"@ldclabs/1paying-kit": "^0.3.2"
 	}
 }

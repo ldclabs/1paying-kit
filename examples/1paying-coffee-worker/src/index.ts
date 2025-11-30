@@ -2,8 +2,7 @@ import { stringToBase64 } from '@ldclabs/1paying-kit/utils'
 import { DurableObject } from 'cloudflare:workers'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { HTTPException } from 'hono/http-exception'
-import { jsonResponse, X402PaymentResult } from './types'
+import { jsonResponse } from './types'
 import { settlePayment } from './x402'
 
 /**
@@ -127,19 +126,7 @@ const app = new Hono<{
 app.get('/api/my-coffee', cors())
 
 app.post('/api/make-coffee', async (ctx) => {
-	let result: X402PaymentResult<any>
-	try {
-		result = await settlePayment(ctx)
-	} catch (err) {
-		if (err instanceof Response) {
-			return err
-		} else if (err instanceof HTTPException) {
-			return err.getResponse()
-		} else {
-			return jsonResponse({ error: String(err) }, 500)
-		}
-	}
-
+	const result = await settlePayment(ctx)
 	const stub = ctx.env.COFFEE_STORE.getByName(result.paymentRequirements.payTo)
 	const order: CoffeeOrder = {
 		payer: result.settleResponse.payer,

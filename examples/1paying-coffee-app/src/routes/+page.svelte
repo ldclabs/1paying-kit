@@ -5,6 +5,7 @@
     type PaymentRequirementsResponse,
     type SettleResponse
   } from '@ldclabs/1paying-kit'
+  import { onMount } from 'svelte'
 
   interface CoffeeOrderRecord {
     payer: string
@@ -37,7 +38,6 @@
       meta: { symbol: string; name: string; decimals: number }
     }
   > = $state([])
-  let requirements = $state<PaymentRequirementsResponse | null>(null)
   let payUrl = $state('')
   let txid = $state('')
   let payWindow = $state<Window | null>(null)
@@ -55,84 +55,59 @@
     resetState()
     isProcessing = true
 
-    if (!payUrl || !txid) {
-      fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
-        method: 'POST'
-      })
-        .then(async (res) => {
-          if (res.status !== 402) {
-            const text = await res.text()
-            throw new Error(
-              `Expected an HTTP 402 response but received ${res.status}: ${text}`
-            )
-          }
-          requirements = await res.json()
-          errorMessage = requirements?.error || ''
-          const { payUrl: newPayUrl, txid: newTxid } =
-            await payingKit.getPayUrl(requirements!)
-          payUrl = newPayUrl
-          txid = newTxid
-        })
-        .catch((error) => {
-          errorMessage = formatError(error)
-        })
-        .finally(() => {
-          isProcessing = false
-        })
-    } else {
+    try {
+      if (!payUrl || !txid) {
+        throw new Error(
+          'Payment URL or transaction ID is missing. Please refresh the page and try again.'
+        )
+      }
+
       // Should open a new window in event handler context to avoid popup blockers in mobile browsers
       payWindow = window.open(payUrl, '1paying-checkout')
-      payingKit
-        .waitForPaymentPayload(txid, {
-          onprogress: (state) => {
-            paymentStatus = state.status
-          }
-        })
-        .then(async (paymentPayload) => {
-          const coffeeRes = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
-            method: 'POST',
-            headers: {
-              'X-PAYMENT': paymentPayload
-            }
-          })
+      const paymentPayload = await payingKit.waitForPaymentPayload(txid, {
+        onprogress: (state) => {
+          paymentStatus = state.status
+        }
+      })
 
-          if (!coffeeRes.ok) {
-            throw new Error(await coffeeRes.text())
-          }
+      payUrl = ''
+      const coffeeRes = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
+        method: 'POST',
+        headers: {
+          'X-PAYMENT': paymentPayload
+        }
+      })
 
-          const { result }: { result: { message: string; merchant: string } } =
-            await coffeeRes.json()
-          successMessage = result.message || 'Enjoy your coffee!'
-          merchant = result.merchant
+      if (!coffeeRes.ok) {
+        throw new Error(await coffeeRes.text())
+      }
 
-          const header = coffeeRes.headers.get('X-PAYMENT-RESPONSE')
-          if (header) {
-            const settleInfo = JSON.parse(
-              base64ToString(header)
-            ) as SettleResponse
-            payer = settleInfo.payer
-            await payingKit
-              .submitSettleResult(txid, settleInfo)
-              .catch((err) => {
-                // Ignore settle submission errors
-                console.error('Settle submission error:', err)
-              })
-            await loadHistory()
-          }
+      const { result }: { result: { message: string; merchant: string } } =
+        await coffeeRes.json()
+      successMessage = result.message || 'Enjoy your coffee!'
+      merchant = result.merchant
+
+      const header = coffeeRes.headers.get('X-PAYMENT-RESPONSE')
+      if (header) {
+        const settleInfo = JSON.parse(base64ToString(header)) as SettleResponse
+        payer = settleInfo.payer
+        await payingKit.submitSettleResult(txid, settleInfo).catch((err) => {
+          // Ignore settle submission errors
+          console.error('Settle submission error:', err)
         })
-        .catch((error) => {
-          errorMessage = formatError(error)
-        })
-        .finally(() => {
-          isProcessing = false
-          if (payWindow && !payWindow.closed) {
-            // Close the payment window if it's still open
-            // We can not reuse the window for another payment due to browser security policies
-            // Error: Blocked a frame with origin "https://1paying-coffee.zensh.workers.dev" from accessing a cross-origin frame.
-            payWindow.close()
-          }
-          payWindow = null
-        })
+        await loadHistory()
+      }
+    } catch (error) {
+      errorMessage = formatError(error)
+    } finally {
+      isProcessing = false
+      if (payWindow && !payWindow.closed) {
+        // Close the payment window if it's still open
+        // We can not reuse the window for another payment due to browser security policies
+        // Error: Blocked a frame with origin "https://1paying-coffee.zensh.workers.dev" from accessing a cross-origin frame.
+        payWindow.close()
+      }
+      payWindow = null
     }
   }
 
@@ -205,12 +180,6 @@
     if (!Number.isFinite(value)) {
       return amount
     }
-    if (value < 1) {
-      return value.toLocaleString(undefined, {
-        minimumFractionDigits: Math.min(decimals, 6),
-        maximumFractionDigits: Math.min(decimals, 6)
-      })
-    }
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: Math.min(decimals, 6)
@@ -240,6 +209,26 @@
     }
     return ''
   }
+
+  onMount(async () => {
+    const res = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
+      method: 'POST'
+    })
+
+    if (res.status !== 402) {
+      const text = await res.text()
+      throw new Error(
+        `Expected an HTTP 402 response but received ${res.status}: ${text}`
+      )
+    }
+    const requirements: PaymentRequirementsResponse = await res.json()
+    errorMessage = requirements?.error || ''
+    const { payUrl: newPayUrl, txid: newTxid } = await payingKit.getPayUrl(
+      requirements!
+    )
+    payUrl = newPayUrl
+    txid = newTxid
+  })
 </script>
 
 <div class="relative min-h-screen overflow-hidden bg-stone-950 text-stone-100">
@@ -335,17 +324,17 @@
           <div class="mt-6 flex flex-col gap-2">
             <button
               type="button"
-              class="m-auto inline-flex w-full max-w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold {requirements
+              class="m-auto inline-flex w-full max-w-xs cursor-pointer items-center justify-center rounded-full bg-amber-600 px-5 py-3 text-sm font-semibold {payUrl
                 ? 'text-green-500'
                 : 'text-stone-950'} shadow-lg shadow-amber-500/20 transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
               onclick={buyCoffee}
               disabled={isProcessing}
             >
-              {!requirements
+              {!payUrl
                 ? 'Buy a Coffee'
                 : isProcessing
                   ? `Waiting for payment...${paymentStatus}`
-                  : 'Pay with 1Pay.ing'}
+                  : 'Pay via 1Pay.ing'}
             </button>
           </div>
         </div>
