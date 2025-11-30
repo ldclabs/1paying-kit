@@ -43,11 +43,21 @@ export async function gzipDecompress(data: Uint8Array): Promise<Uint8Array> {
   if (!supportsNativeDecompression) {
     return Promise.resolve(data)
   }
-  const stream = new DecompressionStream('gzip')
+
+  const type = isGzip(data) ? 'gzip' : 'deflate'
+  const stream = new DecompressionStream(type)
   const chunk = toArrayBuffer(data)
   const resultStream = new Blob([chunk]).stream().pipeThrough(stream)
   const buffer = await new Response(resultStream).arrayBuffer()
   return new Uint8Array(buffer)
+}
+
+export async function tryDecompress(data: Uint8Array): Promise<Uint8Array> {
+  try {
+    return await gzipDecompress(data)
+  } catch {
+    return data
+  }
 }
 
 /**

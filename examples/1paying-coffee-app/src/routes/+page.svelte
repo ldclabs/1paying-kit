@@ -38,6 +38,8 @@
     }
   > = $state([])
   let requirements = $state<PaymentRequirementsResponse | null>(null)
+  let payUrl = $state('')
+  let txid = $state('')
   let payWindow = $state<Window | null>(null)
 
   function resetState() {
@@ -45,7 +47,7 @@
     successMessage = ''
   }
 
-  function buyCoffee() {
+  async function buyCoffee() {
     if (isProcessing) {
       return
     }
@@ -53,7 +55,7 @@
     resetState()
     isProcessing = true
 
-    if (!requirements) {
+    if (!payUrl || !txid) {
       fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
         method: 'POST'
       })
@@ -66,6 +68,10 @@
           }
           requirements = await res.json()
           errorMessage = requirements?.error || ''
+          const { payUrl: newPayUrl, txid: newTxid } =
+            await payingKit.getPayUrl(requirements!)
+          payUrl = newPayUrl
+          txid = newTxid
         })
         .catch((error) => {
           errorMessage = formatError(error)
@@ -74,7 +80,6 @@
           isProcessing = false
         })
     } else {
-      const { payUrl, txid } = payingKit.getPayUrl(requirements)
       // Should open a new window in event handler context to avoid popup blockers in mobile browsers
       payWindow = window.open(payUrl, '1paying-checkout')
       payingKit

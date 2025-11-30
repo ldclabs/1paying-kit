@@ -99,6 +99,7 @@ The library also exports the underlying Gzip compression and decompression funct
 
 - `async gzipCompress(data: Uint8Array): Promise<Uint8Array>`
 - `async gzipDecompress(data: Uint8Array): Promise<Uint8Array>`
+- `async tryDecompress(data: Uint8Array): Promise<Uint8Array>`
 - `isGzip(data: Uint8Array): boolean`
 
 ## License
