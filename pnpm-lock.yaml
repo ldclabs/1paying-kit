@@ -81,8 +81,8 @@ importers:
   examples/1paying-coffee-cli:
     dependencies:
       '@ldclabs/1paying-kit':
-        specifier: ^0.2.4
-        version: 0.2.4
+        specifier: ^0.3.0
+        version: 0.3.0
       undici:
         specifier: ^7.16.0
         version: 7.16.0
@@ -760,6 +760,10 @@ packages:
 
   '@ldclabs/1paying-kit@0.2.4':
     resolution: {integrity: sha512-o6yfvqAtBo+yuX2npPIpSsKxN89SZE83Ue6OOtzgTotDaHdU0MPdXXJJt9CuhWlziCzI6VMHOp45iqxa25nH5w==}
+    engines: {node: '>=20.0.0'}
+
+  '@ldclabs/1paying-kit@0.3.0':
+    resolution: {integrity: sha512-cUlpB/U+Tq06uiSpkNu/BB6VJJS020GtVar/EmZpMMzkKm9ObIAR8Wbkzj5UidB4wzI3ctZgivOYm5iCAh8wtg==}
     engines: {node: '>=20.0.0'}
 
   '@noble/curves@1.9.7':
@@ -3101,6 +3105,12 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@ldclabs/1paying-kit@0.2.4':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      cborg: 4.3.0
+
+  '@ldclabs/1paying-kit@0.3.0':
     dependencies:
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0

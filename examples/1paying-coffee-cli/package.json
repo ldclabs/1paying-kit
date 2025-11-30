@@ -19,7 +19,7 @@
     "ncu": "npx npm-check-updates -u"
   },
   "dependencies": {
-    "@ldclabs/1paying-kit": "^0.2.4",
+    "@ldclabs/1paying-kit": "^0.3.0",
     "undici": "^7.16.0"
   },
   "devDependencies": {

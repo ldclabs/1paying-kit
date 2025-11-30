@@ -174,7 +174,7 @@ export class PayingKit {
     const info: SettleResponse =
       typeof res === 'string'
         ? JSON.parse(base64ToString(res))
-        : res.transaction
+        : res
     await fetch(`${API_ENDPOINT}/${txid}/status`, {
       method: 'PUT',
       headers: {
