@@ -8,7 +8,7 @@ import type {
   TransactionState
 } from './types.js'
 import { toMessageCompact, type SettleResponse } from './types.js'
-import { bytesToBase64Url } from './utils.js'
+import { base64ToString, bytesToBase64Url } from './utils.js'
 
 export * from './gzip.js'
 export * from './types.js'
@@ -81,10 +81,10 @@ export class PayingKit {
    * @param requirements The payment requirements response from the server.
    * @returns An object containing the payment URL and the transaction ID.
    */
-  getPayUrl(requirements: PaymentRequirementsResponse): {
+  async getPayUrl(requirements: PaymentRequirementsResponse): Promise<{
     payUrl: string
     txid: string
-  } {
+  }> {
     const message: Message<PaymentRequirementsResponse> = {
       pubkey: this.#pk,
       nonce: this.#nextNonce(),
@@ -94,7 +94,7 @@ export class PayingKit {
     const cborBytes = encode(toMessageCompact(message), rfc8949EncodeOptions)
     const signature = this.#sign(cborBytes)
     const txid = bytesToBase64Url(signature)
-    const msg = bytesToBase64Url(gzipCompress(cborBytes))
+    const msg = bytesToBase64Url(await gzipCompress(cborBytes))
 
     return {
       payUrl: `${PAYING_ENDPOINT}?action=pay#msg=${msg}&txid=${txid}`,
@@ -167,15 +167,22 @@ export class PayingKit {
    * @param txid The transaction ID to update.
    * @param res The settle response containing the transaction and success status.
    */
-  async submitSettleResult(txid: string, res: SettleResponse): Promise<void> {
+  async submitSettleResult(
+    txid: string,
+    res: SettleResponse | string
+  ): Promise<void> {
+    const info: SettleResponse =
+      typeof res === 'string'
+        ? JSON.parse(base64ToString(res))
+        : res.transaction
     await fetch(`${API_ENDPOINT}/${txid}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        tx: res.transaction,
-        status: res.success ? 'finalized' : 'failed'
+        tx: info.transaction,
+        status: info.success ? 'finalized' : 'failed'
       })
     })
   }

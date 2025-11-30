@@ -289,6 +289,6 @@ export interface SettleResponse {
  * Represents the result of updating a payment transaction status.
  */
 export type UpdatePaymentTxStatus = {
-    tx: string;
-    status: "finalized" | "failed";
+  tx: string
+  status: 'finalized' | 'failed'
 }

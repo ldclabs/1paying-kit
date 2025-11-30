@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { payingKit, type PaymentRequirementsResponse } from './index.js'
 
 describe('PayingKit#getPayUrl', () => {
-  it('encodes requirements into a deterministic payment URL', () => {
+  it('encodes requirements into a deterministic payment URL', async () => {
     const requirements1: PaymentRequirementsResponse = {
       'x402Version': 1,
       'error': 'X-PAYMENT header is required',
@@ -105,9 +105,9 @@ describe('PayingKit#getPayUrl', () => {
     console.log('Requirements 1 JSON length:', json1.length)
     const json2 = JSON.stringify(requirements2)
     console.log('Requirements 2 JSON length:', json2.length)
-    const { payUrl, txid } = payingKit.getPayUrl(requirements1)
+    const { payUrl, txid } = await payingKit.getPayUrl(requirements1)
     console.log('Requirements 1 payUrl length:', payUrl.length)
-    const { payUrl: payUrl2 } = payingKit.getPayUrl(requirements2)
+    const { payUrl: payUrl2 } = await payingKit.getPayUrl(requirements2)
     console.log('Requirements 2 payUrl length:', payUrl2.length)
     console.log({ payUrl2, txid })
     expect(payUrl2.length < payUrl.length * 2).toBe(true)

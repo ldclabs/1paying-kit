@@ -11,7 +11,6 @@ This library is designed to be lightweight and work in modern browser environmen
 - **Payment URL Generation**: Create payment URLs from server-provided requirements.
 - **Payment Verification**: `waitForPaymentPayload` to poll for payment completion and retrieve the payload.
 - **Lightweight**: Minimal dependencies, relying on `@noble/` for cryptography and `cborg` for CBOR encoding.
-- **Built-in Gzip**: Includes a pure TypeScript Gzip implementation for compressing payment messages.
 
 ## Installation
 
@@ -79,7 +78,7 @@ An instance of the `PayingKit` class initialized with a new Ed25519 key pair.
 
 Parses a `fetch` `Response`. If the status is `402` and the `X-PAYMENT-RESPONSE` header is present, it returns an object with the `payUrl` and `txid`. Otherwise, it returns an empty object.
 
-#### `getPayUrl(requirements: PaymentRequirementsResponse): { payUrl: string; txid: string }`
+#### `async getPayUrl(requirements: PaymentRequirementsResponse): Promise<{ payUrl: string; txid: string }>`
 
 Generates a payment URL and transaction ID from the payment requirements provided by the server.
 
@@ -98,10 +97,8 @@ Returns a promise that resolves with the base64-encoded payment payload upon suc
 
 The library also exports the underlying Gzip compression and decompression functions.
 
-- `gzipCompress(data: Uint8Array): Uint8Array`
-- `gzipDecompress(data: Uint8Array): Uint8Array`
-- `gzipCompressString(text: string): Uint8Array`
-- `gzipDecompressToString(data: Uint8Array): string`
+- `async gzipCompress(data: Uint8Array): Promise<Uint8Array>`
+- `async gzipDecompress(data: Uint8Array): Promise<Uint8Array>`
 - `isGzip(data: Uint8Array): boolean`
 
 ## License

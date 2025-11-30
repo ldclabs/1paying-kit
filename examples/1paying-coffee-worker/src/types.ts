@@ -11,7 +11,7 @@ export interface X402PaymentResult<T> {
 }
 
 const JSON_HEADERS = {
-	'content-type': 'application/json; charset=utf-8'
+	'content-type': 'application/json'
 }
 
 export interface JsonResponse {
