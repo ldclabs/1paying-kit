@@ -7,7 +7,7 @@ This library is designed to be lightweight and work in modern browser environmen
 ## Features
 
 - **Easy Integration**: A simple `PayingKit` class to handle payment flows.
-- **Automatic 402 Handling**: `tryGetPayUrl` method to automatically handle `402 Payment Required` responses.
+- **Automatic x402 v1 & v2 Handling**: `tryGetPayUrl` method to automatically handle `402 Payment Required` responses.
 - **Payment URL Generation**: Create payment URLs from server-provided requirements.
 - **Payment Verification**: `waitForPaymentPayload` to poll for payment completion and retrieve the payload.
 - **Lightweight**: Minimal dependencies, relying on `@noble/` for cryptography and `cborg` for CBOR encoding.
@@ -46,10 +46,10 @@ async function fetchData() {
       console.log('Payment successful! Received x402 PaymentPayload:', payload)
 
       // Now you can retry the original request with the payment payload
-      // typically in an 'Authorization' or 'X-Payment' header.
+      // in 'PAYMENT-SIGNATURE' header.
       response = await fetch('https://api.example.com/premium-data', {
         headers: {
-          'X-PAYMENT': payload,
+          'PAYMENT-SIGNATURE': payload,
         },
       })
     } catch (error) {
@@ -76,7 +76,7 @@ An instance of the `PayingKit` class initialized with a new Ed25519 key pair.
 
 #### `async tryGetPayUrl(res: Response): Promise<{ payUrl: string | null; txid: string | null }>`
 
-Parses a `fetch` `Response`. If the status is `402` and the `X-PAYMENT-RESPONSE` header is present, it returns an object with the `payUrl` and `txid`. Otherwise, it returns an empty object.
+Parses a `fetch` `Response`. If the status is `402` and the `PAYMENT-REQUIRED` header is present, it returns an object with the `payUrl` and `txid`. Otherwise, it returns an empty object.
 
 #### `async getPayUrl(requirements: PaymentRequirementsResponse): Promise<{ payUrl: string; txid: string }>`
 

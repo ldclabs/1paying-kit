@@ -43,22 +43,44 @@ export interface MessageCompact<TC> {
  */
 export function toMessage(
   msg:
-    | MessageCompact<PaymentRequirementsResponseCompact>
+    | MessageCompact<PaymentRequirementsResponseCompactV1>
     | Message<PaymentRequirementsResponse>
-): Message<PaymentRequirementsResponse> {
+    | MessageCompact<PaymentRequiredCompact>
+    | Message<PaymentRequired>
+): Message<PaymentRequirementsResponse | PaymentRequired> {
   if ('pubkey' in msg && 'nonce' in msg && 'payload' in msg) {
     return msg
   }
 
-  return {
+  let rt: Message<PaymentRequirementsResponse> = {
     pubkey: msg.pk,
     nonce: msg.n,
     payload: {
       x402Version: msg.p.x,
-      error: msg.p.e,
-      accepts: msg.p.a.map(toPaymentRequirements)
+      error: msg.p.e!,
+      accepts: msg.p.a.map(toPaymentRequirements) as PaymentRequirementsV1[]
     }
   }
+
+  if ('r' in msg.p) {
+    const payload = rt.payload as any as PaymentRequired
+    if (payload.error == null) {
+      delete payload.error
+    }
+    payload['resource'] = {
+      url: msg.p.r.u,
+      description: msg.p.r.d,
+      mimeType: msg.p.r.m
+    }
+    if (msg.p.ex) {
+      payload['extensions'] = {
+        info: msg.p.ex.i,
+        schema: msg.p.ex.s
+      }
+    }
+  }
+
+  return rt
 }
 
 /**
@@ -68,28 +90,120 @@ export function toMessage(
  */
 export function toMessageCompact(
   msg:
-    | MessageCompact<PaymentRequirementsResponseCompact>
+    | MessageCompact<PaymentRequiredCompact>
+    | Message<PaymentRequired>
+    | MessageCompact<PaymentRequirementsResponseCompactV1>
     | Message<PaymentRequirementsResponse>
-): MessageCompact<PaymentRequirementsResponseCompact> {
+): MessageCompact<
+  PaymentRequiredCompact | PaymentRequirementsResponseCompactV1
+> {
   if ('pk' in msg && 'n' in msg && 'p' in msg) {
     return msg
   }
 
-  return {
+  const rt: MessageCompact<PaymentRequirementsResponseCompactV1> = {
     pk: msg.pubkey,
     n: msg.nonce,
     p: {
       x: msg.payload.x402Version,
-      e: msg.payload.error,
-      a: msg.payload.accepts.map(toPaymentRequirementsCompact)
+      e: msg.payload.error!,
+      a: msg.payload.accepts.map(
+        toPaymentRequirementsCompact
+      ) as PaymentRequirementsCompactV1[]
     }
   }
+
+  if ('resource' in msg.payload) {
+    const payload = rt.p as any as PaymentRequiredCompact
+    if (payload.e == null) {
+      delete payload.e
+    }
+    payload['r'] = {
+      u: msg.payload.resource!.url,
+      d: msg.payload.resource!.description,
+      m: msg.payload.resource!.mimeType
+    }
+    if (msg.payload.extensions) {
+      payload['ex'] = {
+        i: msg.payload.extensions.info,
+        s: msg.payload.extensions.schema
+      }
+    }
+  }
+
+  return rt
 }
 
 /**
  * The x402 requirements for a payment.
  */
 export interface PaymentRequirements {
+  /** Payment scheme identifier (e.g., "exact"). */
+  scheme: 'exact' | 'upto'
+  /** Blockchain network identifier (e.g., "icp-druyg-tyaaa-aaaaq-aactq-cai"). */
+  network: string
+  /** Required payment amount in atomic token units. */
+  amount: string
+  /** Token ledger canister address. */
+  asset: string
+  /** Recipient wallet address for the payment. */
+  payTo: string
+  /** Maximum time allowed for payment completion in seconds. */
+  maxTimeoutSeconds: number
+  /** Scheme-specific additional information. */
+  extra?: Record<string, unknown>
+}
+
+/**
+ * Represents a compact version of `PaymentRequirements`.
+ */
+export interface PaymentRequirementsCompact {
+  /** Payment scheme identifier. */
+  s: 'exact' | 'upto' // scheme
+  /** Blockchain network identifier. */
+  n: string // network
+  /** Required payment amount in atomic token units. */
+  am: string // maxAmountRequired
+  /** Token ledger canister address. */
+  a: string // asset
+  /** Recipient wallet address for the payment. */
+  p: string // payTo
+  /** Maximum time allowed for payment completion in seconds. */
+  mts: number // maxTimeoutSeconds
+  /** Scheme-specific additional information. */
+  ex?: Record<string, unknown> // extra
+}
+
+export interface ResourceInfo {
+  /// the protected resource, e.g., URL of the resource endpoint
+  url: string
+  /// Human-readable description of the resource
+  description?: string
+  /// MIME type of the expected response
+  mimeType?: string
+}
+
+export interface ResourceInfoCompact {
+  u: string // url
+  d?: string // description
+  m?: string // mimeType
+}
+
+///  Describes additional extension data for x402 payment.
+export interface Extensions {
+  info: Record<string, unknown>
+  schema: Record<string, unknown>
+}
+
+export interface ExtensionsCompact {
+  i: Record<string, unknown> // info
+  s: Record<string, unknown> // schema
+}
+
+/**
+ * The x402 requirements for a payment.
+ */
+export interface PaymentRequirementsV1 {
   /** Payment scheme identifier (e.g., "exact"). */
   scheme: 'exact' | 'upto'
   /** Blockchain network identifier (e.g., "icp-druyg-tyaaa-aaaaq-aactq-cai"). */
@@ -117,7 +231,7 @@ export interface PaymentRequirements {
 /**
  * Represents a compact version of `PaymentRequirements`.
  */
-export interface PaymentRequirementsCompact {
+export interface PaymentRequirementsCompactV1 {
   /** Payment scheme identifier. */
   s: 'exact' | 'upto' // scheme
   /** Blockchain network identifier. */
@@ -148,27 +262,46 @@ export interface PaymentRequirementsCompact {
  * @returns The standard `PaymentRequirements` object.
  */
 export function toPaymentRequirements(
-  req: PaymentRequirementsCompact | PaymentRequirements
-): PaymentRequirements {
+  req:
+    | PaymentRequirementsCompact
+    | PaymentRequirements
+    | PaymentRequirementsCompactV1
+    | PaymentRequirementsV1
+): PaymentRequirements | PaymentRequirementsV1 {
   if ('scheme' in req) {
     return req
+  }
+
+  if ('mar' in req) {
+    const obj: PaymentRequirementsV1 = {
+      scheme: req.s,
+      network: req.n,
+      maxAmountRequired: req.mar,
+      asset: req.a,
+      payTo: req.p,
+      resource: req.r,
+      description: req.d,
+      maxTimeoutSeconds: req.mts
+    }
+    if (req.mt) {
+      obj.mimeType = req.mt
+    }
+    if (req.os) {
+      obj.outputSchema = req.os
+    }
+    if (req.ex) {
+      obj.extra = req.ex
+    }
+    return obj
   }
 
   const obj: PaymentRequirements = {
     scheme: req.s,
     network: req.n,
-    maxAmountRequired: req.mar,
+    amount: req.am,
     asset: req.a,
     payTo: req.p,
-    resource: req.r,
-    description: req.d,
     maxTimeoutSeconds: req.mts
-  }
-  if (req.mt) {
-    obj.mimeType = req.mt
-  }
-  if (req.os) {
-    obj.outputSchema = req.os
   }
   if (req.ex) {
     obj.extra = req.ex
@@ -182,32 +315,75 @@ export function toPaymentRequirements(
  * @returns The compact `PaymentRequirementsCompact` object.
  */
 export function toPaymentRequirementsCompact(
-  req: PaymentRequirementsCompact | PaymentRequirements
-): PaymentRequirementsCompact {
+  req:
+    | PaymentRequirementsCompact
+    | PaymentRequirements
+    | PaymentRequirementsCompactV1
+    | PaymentRequirementsV1
+): PaymentRequirementsCompact | PaymentRequirementsCompactV1 {
   if ('s' in req) {
     return req
+  }
+
+  if ('maxAmountRequired' in req) {
+    const obj: PaymentRequirementsCompactV1 = {
+      s: req.scheme,
+      n: req.network,
+      mar: req.maxAmountRequired,
+      a: req.asset,
+      p: req.payTo,
+      r: req.resource,
+      d: req.description,
+      mts: req.maxTimeoutSeconds
+    }
+    if (req.mimeType) {
+      obj.mt = req.mimeType
+    }
+    if (req.outputSchema) {
+      obj.os = req.outputSchema
+    }
+    if (req.extra) {
+      obj.ex = req.extra
+    }
+    return obj
   }
 
   const obj: PaymentRequirementsCompact = {
     s: req.scheme,
     n: req.network,
-    mar: req.maxAmountRequired,
+    am: req.amount,
     a: req.asset,
     p: req.payTo,
-    r: req.resource,
-    d: req.description,
     mts: req.maxTimeoutSeconds
-  }
-  if (req.mimeType) {
-    obj.mt = req.mimeType
-  }
-  if (req.outputSchema) {
-    obj.os = req.outputSchema
   }
   if (req.extra) {
     obj.ex = req.extra
   }
   return obj
+}
+
+export interface PaymentRequired {
+  /** The version of the X402 protocol. */
+  x402Version: number
+  /** An error message if the request failed. */
+  error?: string
+  /** Information about the protected resource. */
+  resource: ResourceInfo
+  /** A list of accepted payment requirements. */
+  accepts: PaymentRequirements[]
+  /** Protocol extensions data */
+  extensions?: Extensions
+}
+
+/**
+ * Represents a compact version of `PaymentRequired`.
+ */
+export interface PaymentRequiredCompact {
+  x: number // x402Version
+  e?: string // error
+  a: PaymentRequirementsCompact[] // accepts
+  r: ResourceInfoCompact // resource
+  ex?: ExtensionsCompact // extensions
 }
 
 /**
@@ -219,26 +395,23 @@ export interface PaymentRequirementsResponse {
   /** An error message if the request failed. */
   error: string
   /** A list of accepted payment requirements. */
-  accepts: PaymentRequirements[]
+  accepts: PaymentRequirementsV1[]
 }
 
 /**
  * Represents a compact version of `PaymentRequirementsResponse`.
  */
-export interface PaymentRequirementsResponseCompact {
-  /** The version of the X402 protocol. */
+export interface PaymentRequirementsResponseCompactV1 {
   x: number // x402Version
-  /** An error message if the request failed. */
   e: string // error
-  /** A list of accepted compact payment requirements. */
-  a: PaymentRequirementsCompact[] // accepts
+  a: PaymentRequirementsCompactV1[] // accepts
 }
 
 /**
  * Represents a generic payment payload.
  * @template T The type of the scheme-specific payload.
  */
-export interface PaymentPayload<T> {
+export interface PaymentPayloadV1<T> {
   /** The version of the X402 protocol. */
   x402Version: number
   /** The payment scheme identifier. */
@@ -249,12 +422,25 @@ export interface PaymentPayload<T> {
   payload: T
 }
 
+export interface PaymentPayload<T> {
+  /** The version of the X402 protocol. */
+  x402Version: number
+  /** Information about the protected resource. */
+  resource?: ResourceInfo
+  /** PaymentRequirements object indicating the payment method chosen */
+  accepted: PaymentRequirements
+  /** The scheme-specific payload. */
+  payload: T
+  /** Protocol extensions data */
+  extensions?: Extensions
+}
+
 /** Represents the verification and settlement request structure for X402 payments.
  * @template T The type of the payment payload.
  */
 export interface X402Request<T> {
-  paymentPayload: PaymentPayload<T>
-  paymentRequirements: PaymentRequirements
+  paymentPayload: PaymentPayload<T> | PaymentPayloadV1<T>
+  paymentRequirements: PaymentRequirements | PaymentRequirementsV1
 }
 
 /**
@@ -264,7 +450,7 @@ export interface VerifyResponse {
   /** Indicates whether the payment is valid. */
   isValid: boolean
   /** The address of the payer. */
-  payer: string
+  payer?: string
   /** The reason why the payment is invalid, if applicable. */
   invalidReason?: string
 }
@@ -282,7 +468,7 @@ export interface SettleResponse {
   /** The blockchain network where the transaction was processed. */
   network: string
   /** The address of the payer. */
-  payer: string
+  payer?: string
 }
 
 /**

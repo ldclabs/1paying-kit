@@ -4,6 +4,7 @@ import { encode, rfc8949EncodeOptions } from 'cborg'
 import { gzipCompress } from './gzip.js'
 import type {
   Message,
+  PaymentRequired,
   PaymentRequirementsResponse,
   TransactionState
 } from './types.js'
@@ -61,7 +62,7 @@ export class PayingKit {
 
   /**
    * Tries to get a payment URL and transaction ID from a fetch Response.
-   * It checks if the response status is 402 (Payment Required) and if the 'X-PAYMENT-RESPONSE' header is present.
+   * It checks if the response status is 402 (Payment Required) and if the 'PAYMENT-REQUIRED' header is present.
    * @param res The fetch Response object.
    * @returns A object containing the payment URL and transaction ID, or an empty object if payment is not required.
    */
@@ -72,7 +73,16 @@ export class PayingKit {
     if (res.status !== 402) {
       return { payUrl: null, txid: null }
     }
-    const requirements: PaymentRequirementsResponse = await res.json()
+
+    if (res.headers.has('PAYMENT-REQUIRED')) {
+      const requirements: PaymentRequired = JSON.parse(
+        base64ToString(res.headers.get('PAYMENT-REQUIRED')!)
+      )
+      return this.getPayUrl(requirements)
+    }
+
+    const requirements: PaymentRequirementsResponse | PaymentRequired =
+      await res.json()
     return this.getPayUrl(requirements)
   }
 
@@ -81,17 +91,22 @@ export class PayingKit {
    * @param requirements The payment requirements response from the server.
    * @returns An object containing the payment URL and the transaction ID.
    */
-  async getPayUrl(requirements: PaymentRequirementsResponse): Promise<{
+  async getPayUrl(
+    requirements: PaymentRequirementsResponse | PaymentRequired
+  ): Promise<{
     payUrl: string
     txid: string
   }> {
-    const message: Message<PaymentRequirementsResponse> = {
+    const message: Message<PaymentRequirementsResponse | PaymentRequired> = {
       pubkey: this.#pk,
       nonce: this.#nextNonce(),
       payload: requirements
     }
 
-    const cborBytes = encode(toMessageCompact(message), rfc8949EncodeOptions)
+    const cborBytes = encode(
+      toMessageCompact(message as Message<PaymentRequired>),
+      rfc8949EncodeOptions
+    )
     const signature = this.#sign(cborBytes)
     const txid = bytesToBase64Url(signature)
     const msg = bytesToBase64Url(await gzipCompress(cborBytes))
@@ -169,12 +184,14 @@ export class PayingKit {
    */
   async submitSettleResult(
     txid: string,
-    res: SettleResponse | string
+    res: SettleResponse | string | Headers
   ): Promise<void> {
-    const info: SettleResponse =
-      typeof res === 'string'
-        ? JSON.parse(base64ToString(res))
+    const val =
+      res instanceof Headers
+        ? res.get('PAYMENT-RESPONSE') || res.get('X-PAYMENT-RESPONSE')
         : res
+    const info: SettleResponse =
+      typeof val === 'string' ? JSON.parse(base64ToString(val)) : val
     await fetch(`${API_ENDPOINT}/${txid}/status`, {
       method: 'PUT',
       headers: {
