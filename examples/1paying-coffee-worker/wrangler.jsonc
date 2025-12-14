@@ -47,37 +47,34 @@
 	 */
 	"vars": {
 		"X402_FACILITATORS": {
-			"solana": "https://facilitator.payai.network",
-			"solana-devnet": "https://www.x402.org/facilitator",
-			"base-sepolia": "https://www.x402.org/facilitator"
+			"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://facilitator.payai.network",
+			"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1sK6u9hC4BXj": "https://www.x402.org/facilitator",
+			"eip155:84532": "https://www.x402.org/facilitator",
+			"icp:1": "https://ogkpr-lyaaa-aaaap-an5fq-cai.icp0.io"
 		},
-		"X402_PAYMENT_REQUIREMENTS": {
-			"x402Version": 1,
+		"X402_PAYMENT_REQUIRED": {
+			"x402Version": 2,
 			"error": "Payment required",
+			"resource": {
+				"url": "https://example.1pay.ing/1paying-coffee/Cappuccino",
+				"description": "Purchase a Grande Cappuccino with oat milk",
+				"mimeType": "text/markdown"
+			},
 			"accepts": [
 				{
 					"scheme": "exact",
-					"network": "solana",
-					"maxAmountRequired": "1000000",
-					"asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
-					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
-					"description": "Grande Cappuccino with oat milk",
-					"mimeType": "image/png",
-					"maxTimeoutSeconds": 120,
-					"extra": {
-						"feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
-					}
+					"network": "icp:1",
+					"amount": "100000000",
+					"asset": "druyg-tyaaa-aaaaq-aactq-cai",
+					"payTo": "77ibd-jp5kr-moeco-kgoar-rro5v-5tng4-krif5-5h2i6-osf2f-2sjtv-kqe",
+					"maxTimeoutSeconds": 120
 				},
 				{
 					"scheme": "exact",
 					"network": "solana-devnet",
-					"maxAmountRequired": "10000",
+					"amount": "10000",
 					"asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 					"payTo": "FRVJU92DEkT6yQyQtyEKwUeKWPqhHeYJqsTCdxUjq8iP",
-					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
-					"description": "Grande Cappuccino with oat milk",
-					"mimeType": "image/png",
 					"maxTimeoutSeconds": 120,
 					"extra": {
 						"feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
@@ -86,12 +83,9 @@
 				{
 					"scheme": "exact",
 					"network": "base-sepolia",
-					"maxAmountRequired": "10000",
+					"amount": "10000",
 					"payTo": "0x185a1DEf920B8c8f936988D70aC93aE453acf42B",
 					"asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-					"resource": "https://example.1pay.ing/1paying-coffee/Cappuccino",
-					"description": "Grande Cappuccino with oat milk",
-					"mimeType": "image/png",
 					"maxTimeoutSeconds": 300,
 					"extra": { "name": "USDC", "version": "2" }
 				}

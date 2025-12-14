@@ -129,11 +129,14 @@ app.post('/api/make-coffee', async (ctx) => {
 	const result = await settlePayment(ctx)
 	const stub = ctx.env.COFFEE_STORE.getByName(result.paymentRequirements.payTo)
 	const order: CoffeeOrder = {
-		payer: result.settleResponse.payer,
+		payer: result.settleResponse.payer || '',
 		asset: result.paymentRequirements.asset,
-		amountRequired: result.paymentRequirements.maxAmountRequired,
+		amountRequired:
+			'maxAmountRequired' in result.paymentRequirements
+				? (result.paymentRequirements.maxAmountRequired as string)
+				: result.paymentRequirements.amount,
 		transaction: result.settleResponse.transaction,
-		network: result.paymentPayload.network
+		network: result.paymentRequirements.network
 	}
 	const coffeeMessage = await stub.makeCoffee(order)
 
@@ -146,9 +149,7 @@ app.post('/api/make-coffee', async (ctx) => {
 		},
 		200,
 		{
-			'X-PAYMENT-RESPONSE': stringToBase64(
-				JSON.stringify(result.settleResponse)
-			)
+			'PAYMENT-RESPONSE': stringToBase64(JSON.stringify(result.settleResponse))
 		}
 	)
 })

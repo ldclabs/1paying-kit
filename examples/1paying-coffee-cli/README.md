@@ -12,7 +12,7 @@ The script `cli.ts` performs the following steps:
 2.  **Handle 402 Response**: The server responds with `402 Payment Required`. The script uses `payingKit.tryGetPayUrl()` to parse this response and extract the unique payment URL and transaction ID.
 3.  **User Payment**: It prints the payment URL to the console and prompts the user to open it in a browser to authorize the payment with their 1Pay.ing wallet.
 4.  **Wait for Payload**: While the user is paying, the script uses `payingKit.waitForPaymentPayload()` to poll for the payment confirmation. It displays the payment status in real-time directly in the console.
-5.  **Retry with Payment**: Once the payment is successful, the kit returns a payment payload header. The script retries the initial request, this time including the payload in the `X-PAYMENT` header.
+5.  **Retry with Payment**: Once the payment is successful, the kit returns a payment payload header. The script retries the initial request, this time including the payload in the `PAYMENT-SIGNATURE` header.
 6.  **Success**: The server validates the payment and returns the protected resource (a JSON object representing a coffee). The CLI then prints the final result.
 
 ## How to Run

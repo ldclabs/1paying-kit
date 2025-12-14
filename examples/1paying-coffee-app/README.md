@@ -19,7 +19,7 @@ The application consists of two main parts within the monorepo:
 3. The worker, using `1paying-kit`'s server-side utilities, returns an `HTTP 402 Payment Required` response.
 4. The frontend `1paying-kit` intercepts this response, opens the 1Pay.ing wallet for the user to approve the transaction.
 5. Upon successful payment, the kit provides a `paymentPayload`.
-6. The frontend automatically retries the original request, this time including the `paymentPayload` in the `X-PAYMENT` header.
+6. The frontend automatically retries the original request, this time including the `paymentPayload` in the `PAYMENT-SIGNATURE` header.
 7. The worker verifies the payment, records the order in its SQLite-backed Durable Object, and returns a success message.
 8. The user's coffee purchase history is then displayed on the page.
 

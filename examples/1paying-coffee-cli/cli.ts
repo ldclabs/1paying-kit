@@ -40,21 +40,20 @@ async function main() {
       })
 
       // Now you can retry the original request with the payment payload
-      // typically in an 'Authorization' or 'X-Payment' header.
+      // typically in 'PAYMENT-SIGNATURE' header.
       response = await fetch(`${coffeeStore}/api/make-coffee`, {
         method: 'POST',
         headers: {
-          'X-PAYMENT': payloadHeader
+          'PAYMENT-SIGNATURE': payloadHeader
         }
       })
-      const header = response.headers.get('X-PAYMENT-RESPONSE')
-      if (header) {
-        // Optionally submit the settle result back to 1pay.ing for better analytics
-        await payingKit.submitSettleResult(txid, header.trim()).catch((err) => {
+      // Optionally submit the settle result back to 1pay.ing for better analytics
+      await payingKit
+        .submitSettleResult(txid, response.headers)
+        .catch((err) => {
           // Ignore settle submission errors
           console.error('Settle submission error:', err)
         })
-      }
     } catch (error) {
       console.error('Payment failed or timed out:', error)
       throw error

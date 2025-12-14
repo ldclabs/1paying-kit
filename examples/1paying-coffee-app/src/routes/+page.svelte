@@ -1,9 +1,7 @@
 <script lang="ts">
   import {
-    base64ToString,
     payingKit,
-    type PaymentRequirementsResponse,
-    type SettleResponse
+    type PaymentRequirementsResponse
   } from '@ldclabs/1paying-kit'
   import { onMount } from 'svelte'
 
@@ -74,7 +72,7 @@
       const coffeeRes = await fetch(`${COFFEE_STORE_URL}/api/make-coffee`, {
         method: 'POST',
         headers: {
-          'X-PAYMENT': paymentPayload
+          'PAYMENT-SIGNATURE': paymentPayload
         }
       })
 
@@ -87,10 +85,9 @@
       successMessage = result.message || 'Enjoy your coffee!'
       merchant = result.merchant
 
-      const header = coffeeRes.headers.get('X-PAYMENT-RESPONSE')
-      if (header) {
-        const settleInfo = JSON.parse(base64ToString(header)) as SettleResponse
-        payer = settleInfo.payer
+      const settleInfo = payingKit.getSettleResponse(coffeeRes.headers)
+      if (settleInfo) {
+        payer = settleInfo.payer || ''
         await payingKit.submitSettleResult(txid, settleInfo).catch((err) => {
           // Ignore settle submission errors
           console.error('Settle submission error:', err)
@@ -167,6 +164,16 @@
         symbol: 'USDC',
         name: 'USDC',
         decimals: 6
+      },
+      'ryjl3-tyaaa-aaaaa-aaaba-cai': {
+        symbol: 'ICP',
+        name: 'ICP',
+        decimals: 8
+      },
+      'druyg-tyaaa-aaaaq-aactq-cai': {
+        symbol: 'PANDA',
+        name: 'ICPanda',
+        decimals: 8
       }
     }
 
@@ -201,11 +208,17 @@
     if (!tx) {
       return ''
     }
-    if (network === 'solana-devnet') {
-      return `https://solscan.io/tx/${tx}?cluster=devnet`
-    }
-    if (network === 'solana') {
-      return `https://solscan.io/tx/${tx}`
+
+    switch (network) {
+      case 'solana-devnet':
+      case 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1sK6u9hC4BXj':
+        return `https://solscan.io/tx/${tx}?cluster=devnet`
+      case 'solana':
+      case 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp':
+        return `https://solscan.io/tx/${tx}`
+      case 'icp':
+      case 'icp:1':
+        return `https://dashboard.internetcomputer.org/tokens` // todo: add tx link
     }
     return ''
   }
@@ -215,19 +228,17 @@
       method: 'POST'
     })
 
-    if (res.status !== 402) {
+    const { payUrl: newPayUrl, txid: newTxid } =
+      await payingKit.tryGetPayUrl(res)
+    payUrl = newPayUrl || ''
+    txid = newTxid || ''
+
+    if (!payUrl || !txid) {
       const text = await res.text()
       throw new Error(
         `Expected an HTTP 402 response but received ${res.status}: ${text}`
       )
     }
-    const requirements: PaymentRequirementsResponse = await res.json()
-    errorMessage = requirements?.error || ''
-    const { payUrl: newPayUrl, txid: newTxid } = await payingKit.getPayUrl(
-      requirements!
-    )
-    payUrl = newPayUrl
-    txid = newTxid
   })
 </script>
 
