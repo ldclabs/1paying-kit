@@ -74,15 +74,10 @@ export class PayingKit {
       return { payUrl: null, txid: null }
     }
 
-    if (res.headers.has('PAYMENT-REQUIRED')) {
-      const requirements: PaymentRequired = JSON.parse(
-        base64ToString(res.headers.get('PAYMENT-REQUIRED')!)
-      )
-      return this.getPayUrl(requirements)
-    }
-
-    const requirements: PaymentRequirementsResponse | PaymentRequired =
-      await res.json()
+    const val = res.headers.get('PAYMENT-REQUIRED')
+    const requirements = val
+      ? JSON.parse(base64ToString(val))
+      : await res.json()
     return this.getPayUrl(requirements)
   }
 
@@ -178,30 +173,42 @@ export class PayingKit {
   }
 
   /**
+   * Extracts a settle response from various input types.
+   * @param input The settle response, which can be a SettleResponse object, a base64-encoded string, or Headers.
+   * @returns The parsed SettleResponse object, or null if not available.
+   */
+  getSettleResponse(
+    input: SettleResponse | string | Headers
+  ): SettleResponse | null {
+    const val =
+      input instanceof Headers
+        ? input.get('PAYMENT-RESPONSE') || input.get('X-PAYMENT-RESPONSE')
+        : input
+    return typeof val === 'string' ? JSON.parse(base64ToString(val)) : val
+  }
+
+  /**
    * (Optional) Submits a settle response to update the transaction status.
    * @param txid The transaction ID to update.
-   * @param res The settle response containing the transaction and success status.
+   * @param input The settle response, which can be a SettleResponse object, a base64-encoded string, or Headers.
    */
   async submitSettleResult(
     txid: string,
-    res: SettleResponse | string | Headers
+    input: SettleResponse | string | Headers
   ): Promise<void> {
-    const val =
-      res instanceof Headers
-        ? res.get('PAYMENT-RESPONSE') || res.get('X-PAYMENT-RESPONSE')
-        : res
-    const info: SettleResponse =
-      typeof val === 'string' ? JSON.parse(base64ToString(val)) : val
-    await fetch(`${API_ENDPOINT}/${txid}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        tx: info.transaction,
-        status: info.success ? 'finalized' : 'failed'
+    const info = this.getSettleResponse(input)
+    if (info) {
+      await fetch(`${API_ENDPOINT}/${txid}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tx: info.transaction,
+          status: info.success ? 'finalized' : 'failed'
+        })
       })
-    })
+    }
   }
 
   #nextNonce(): number {
