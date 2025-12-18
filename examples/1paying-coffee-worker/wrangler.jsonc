@@ -48,7 +48,7 @@
 	"vars": {
 		"X402_FACILITATORS": {
 			"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://facilitator.payai.network",
-			"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1sK6u9hC4BXj": "https://www.x402.org/facilitator",
+			"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": "https://www.x402.org/facilitator",
 			"eip155:84532": "https://www.x402.org/facilitator",
 			"icp:1": "https://ogkpr-lyaaa-aaaap-an5fq-cai.icp0.io"
 		},

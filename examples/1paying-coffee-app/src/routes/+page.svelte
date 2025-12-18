@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
-    payingKit,
-    type PaymentRequirementsResponse
+      payingKit
   } from '@ldclabs/1paying-kit'
   import { onMount } from 'svelte'
 
@@ -211,7 +210,7 @@
 
     switch (network) {
       case 'solana-devnet':
-      case 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1sK6u9hC4BXj':
+      case 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1':
         return `https://solscan.io/tx/${tx}?cluster=devnet`
       case 'solana':
       case 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp':
